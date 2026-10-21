@@ -20,6 +20,8 @@ permissions:
 concurrency:
   group: update-protocol
   cancel-in-progress: false
+  # Preserve pending releases; the default queue replaces the previous pending run.
+  queue: max
 
 jobs:
   update:
@@ -30,7 +32,8 @@ jobs:
       commit: ${{ steps.commit.outputs.sha }}
       tag: ${{ steps.revision.outputs.tag }}
       prerelease: ${{ steps.revision.outputs.prerelease }}
-      skip: ${{ steps.revision.outputs.skip }}
+      historical: ${{ steps.commit.outputs.historical }}
+      temporary_branch: ${{ steps.commit.outputs.temporary_branch }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -50,7 +53,6 @@ jobs:
             echo "The requested revision must belong to ProtocolDefinitions master"
             exit 1
           }
-          CURRENT_SHA=$(git -C ProtocolDefinitions rev-parse HEAD)
           git -C ProtocolDefinitions checkout --detach "$REQUESTED_SHA"
           REQUESTED_SHA=$(git -C ProtocolDefinitions rev-parse HEAD)
           python3 scripts/validate-version.py "$PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
@@ -63,16 +65,12 @@ jobs:
             echo "existing_commit=$(git rev-parse "refs/tags/v$PACKAGE_VERSION^{commit}")" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          if [[ "$CURRENT_SHA" != "$REQUESTED_SHA" ]] && git -C ProtocolDefinitions merge-base --is-ancestor "$REQUESTED_SHA" "$CURRENT_SHA"; then
-            echo "Ignoring an older protocol update; the default branch has already advanced"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          fi
 
       - uses: ./.github/actions/setup
-        if: steps.revision.outputs.skip != 'true' && steps.revision.outputs.existing_commit == ''
+        if: steps.revision.outputs.existing_commit == ''
 
       - name: Regenerate and verify
-        if: steps.revision.outputs.skip != 'true' && steps.revision.outputs.existing_commit == ''
+        if: steps.revision.outputs.existing_commit == ''
         run: |
           scripts/generate-swift.sh
           swift test
@@ -80,28 +78,15 @@ jobs:
 
       - name: Commit and push the generated package update
         id: commit
-        if: steps.revision.outputs.skip != 'true'
         env:
           PROTOCOL_SHA: ${{ steps.revision.outputs.sha }}
           EXISTING_COMMIT: ${{ steps.revision.outputs.existing_commit }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          if [[ -n "$EXISTING_COMMIT" ]]; then
-            echo "sha=$EXISTING_COMMIT" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          git add Sources/BlueyeProtocol ProtocolDefinitions
-          if ! git diff --cached --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Update protocol to ${PROTOCOL_SHA:0:12}"
-            git push origin "HEAD:$DEFAULT_BRANCH"
-          fi
-          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          RELEASE_TAG: ${{ steps.revision.outputs.tag }}
+        run: python3 scripts/publish-generated.py
 
   verify:
     needs: update
-    if: needs.update.outputs.skip != 'true'
     uses: ./.github/workflows/ci.yml
     with:
       ref: ${{ needs.update.outputs.commit }}
@@ -112,12 +97,16 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.update.outputs.commit }}
       - name: Create the shared version tag and GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ needs.update.outputs.tag }}
           RELEASE_COMMIT: ${{ needs.update.outputs.commit }}
           PRERELEASE: ${{ needs.update.outputs.prerelease }}
+          HISTORICAL: ${{ needs.update.outputs.historical }}
         run: |
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "$RELEASE_TAG is already released"
@@ -125,5 +114,17 @@ jobs:
           fi
           OPTIONS=()
           if [[ "$PRERELEASE" == "true" ]]; then OPTIONS+=(--prerelease); fi
+          if [[ "$HISTORICAL" == "true" ]]; then OPTIONS+=(--latest=false); fi
           gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
             --target "$RELEASE_COMMIT" --title "$RELEASE_TAG" --generate-notes "${OPTIONS[@]}"
+      - name: Remove the temporary historical release branch
+        if: needs.update.outputs.temporary_branch != ''
+        env:
+          TEMPORARY_BRANCH: ${{ needs.update.outputs.temporary_branch }}
+          RELEASE_COMMIT: ${{ needs.update.outputs.commit }}
+        run: |
+          REMOTE_REF=$(git ls-remote origin "refs/heads/$TEMPORARY_BRANCH")
+          if [[ -n "$REMOTE_REF" ]]; then
+            git push --force-with-lease="refs/heads/$TEMPORARY_BRANCH:$RELEASE_COMMIT" \
+              origin ":refs/heads/$TEMPORARY_BRANCH"
+          fi

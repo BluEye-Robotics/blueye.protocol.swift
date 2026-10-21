@@ -93,12 +93,19 @@ The **Update and release protocol** workflow:
 
 1. Verifies that the SHA belongs to upstream master and the version matches the
    pinned revision's `version.txt`.
-2. Advances the submodule to that SHA, regenerates, tests, and commits the sources.
+2. Checks out that SHA, regenerates, tests, and commits the sources. Newer
+   revisions advance the default branch; historical revisions use a temporary
+   release branch so the default branch never moves backward.
 3. Runs the full macOS/Linux CI workflow against that generated commit.
 4. Creates a matching immutable version tag and GitHub Release.
 
-Updates are serialized. An older update is ignored if the default branch has
-already advanced; an existing tag is reused only for the same protocol SHA.
+Complete update, verification, and release runs are serialized with
+[queue: max](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency),
+so new arrivals do not replace pending runs (up to 100 pending runs). Delivery
+order does not determine which versions get tagged: older revisions still receive their exact version tag after CI passes, without
+changing the default branch or the latest release. Their temporary branches
+are deleted after release; a failed attempt retains its branch for inspection.
+An existing tag is reused only for the same protocol SHA.
 The receiver uses `GITHUB_TOKEN` with `contents: write`. Bot pushes do not start
 another Actions run, so the receiver explicitly calls CI before releasing.
 
