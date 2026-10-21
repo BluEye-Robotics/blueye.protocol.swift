@@ -75,7 +75,7 @@ When upgrading tools, update `Package.swift`, `protobuf.version`, and
 `protobuf.checksums` as appropriate, then regenerate and test.
 
 CI verifies generation, tests binary fixtures, Any, timestamps, oneofs, and
-unknown fields, and builds in release mode on macOS and Linux with Swift 6.2.3.
+unknown fields, and builds in release mode on macOS and Linux with Swift 6.2.1.
 
 ## Shared versioning and releases
 
