@@ -1,0 +1,13 @@
+name: Set up Swift protocol tools
+description: Install the supported Swift toolchain and checksum-verified protoc
+runs:
+  using: composite
+  steps:
+    - uses: swift-actions/setup-swift@v2
+      with:
+        swift-version: "6.2.3"
+    - name: Install protoc
+      shell: bash
+      run: |
+        scripts/install-protoc.sh "$RUNNER_TEMP/protoc"
+        echo "$RUNNER_TEMP/protoc/bin" >> "$GITHUB_PATH"

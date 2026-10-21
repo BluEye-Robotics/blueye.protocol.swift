@@ -1,0 +1,36 @@
+name: Swift package
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: Exact generated-package commit to verify
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+          submodules: true
+      - name: Test shared version validation
+        run: python3 -B -m unittest discover -s scripts -p 'test_*.py'
+      - uses: ./.github/actions/setup
+      - name: Verify generated sources
+        run: scripts/generate-swift.sh --check
+      - name: Test public API and wire compatibility
+        run: swift test
+      - name: Build release library
+        run: swift build --configuration release
