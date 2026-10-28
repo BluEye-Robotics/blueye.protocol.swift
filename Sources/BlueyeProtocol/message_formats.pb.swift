@@ -2836,6 +2836,10 @@ public nonisolated struct Blueye_Protocol_LaserDetection: Sendable {
   /// Estimated subject distance (m).
   public var estimatedDistance: Float = 0
 
+  /// Id of the camera frame the detection was computed from, 0 if unknown. Matches the frame id
+  /// embedded in recorded video; ModelDetections describes the format.
+  public var frameID: UInt64 = 0
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -8341,6 +8345,23 @@ public nonisolated struct Blueye_Protocol_ObjectDetection: Sendable {
 }
 
 /// A list of object detections from a single model for a single video frame.
+///
+/// frame_id matches detections to the exact frame of a recording. The video pipeline on the X3 Ultra
+/// assigns an id to each camera frame once, passes it to the computer vision models and the recorder,
+/// and writes it into the recorded video. An id is never reused within one boot of the drone, and stays
+/// below 2^53, so it is exact as a JavaScript number. The models do not process every frame, so the ids
+/// of successive results can skip.
+///
+/// Recorded video carries the id in a user_data_unregistered SEI message (payload type 5), one per access
+/// unit, placed before the first slice: NAL unit type 6 in H.264 and PREFIX_SEI_NUT (type 39) in H.265.
+/// The payload is 32 bytes, counted after the emulation prevention bytes are removed:
+///
+/// - Bytes 0-15: UUID 6b1e2f0c-935d-4a8e-b17a-52d40e3c91f6, in the byte order written.
+/// - Bytes 16-23: frame_id, uint64 big-endian.
+/// - Bytes 24-31: capture time of the frame in CLOCK_MONOTONIC on the drone (ns), uint64 big-endian, 0 if unknown.
+///
+/// A frame that the recorder repeats to keep the frame rate carries the id of the frame it repeats.
+/// Re-encoding the video drops the SEI, so only the original recording carries the ids.
 public nonisolated struct Blueye_Protocol_ModelDetections: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -8360,6 +8381,10 @@ public nonisolated struct Blueye_Protocol_ModelDetections: Sendable {
 
   /// Name of the computer vision model that produced the detections.
   public var modelName: String = String()
+
+  /// Id of the camera frame the detections were computed from, 0 if unknown. Matches the frame id
+  /// embedded in recorded video; the message description gives the format.
+  public var frameID: UInt64 = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -8484,6 +8509,10 @@ public nonisolated struct Blueye_Protocol_SotState: Sendable {
 
   /// Kalman rate of change of the bounding box aspect ratio, width / height (1/s).
   public var vr: Float = 0
+
+  /// Id of the camera frame the state was computed from, 0 if unknown. Matches the frame id embedded
+  /// in recorded video; ModelDetections describes the format.
+  public var frameID: UInt64 = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -9109,7 +9138,7 @@ nonisolated extension Blueye_Protocol_Point2D: SwiftProtobuf.Message, SwiftProto
 
 nonisolated extension Blueye_Protocol_LaserDetection: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".LaserDetection"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}detected\0\u{1}dot1\0\u{1}dot2\0\u{3}pixel_distance\0\u{1}confidence\0\u{3}image_width\0\u{3}image_height\0\u{3}laser_width\0\u{3}corrected_pixel_distance\0\u{3}estimated_distance\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}detected\0\u{1}dot1\0\u{1}dot2\0\u{3}pixel_distance\0\u{1}confidence\0\u{3}image_width\0\u{3}image_height\0\u{3}laser_width\0\u{3}corrected_pixel_distance\0\u{3}estimated_distance\0\u{3}frame_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -9127,6 +9156,7 @@ nonisolated extension Blueye_Protocol_LaserDetection: SwiftProtobuf.Message, Swi
       case 8: try { try decoder.decodeSingularFloatField(value: &self.laserWidth) }()
       case 9: try { try decoder.decodeSingularFloatField(value: &self.correctedPixelDistance) }()
       case 10: try { try decoder.decodeSingularFloatField(value: &self.estimatedDistance) }()
+      case 11: try { try decoder.decodeSingularUInt64Field(value: &self.frameID) }()
       default: break
       }
     }
@@ -9167,6 +9197,9 @@ nonisolated extension Blueye_Protocol_LaserDetection: SwiftProtobuf.Message, Swi
     if self.estimatedDistance.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.estimatedDistance, fieldNumber: 10)
     }
+    if self.frameID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.frameID, fieldNumber: 11)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -9181,6 +9214,7 @@ nonisolated extension Blueye_Protocol_LaserDetection: SwiftProtobuf.Message, Swi
     if lhs.laserWidth != rhs.laserWidth {return false}
     if lhs.correctedPixelDistance != rhs.correctedPixelDistance {return false}
     if lhs.estimatedDistance != rhs.estimatedDistance {return false}
+    if lhs.frameID != rhs.frameID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -17030,7 +17064,7 @@ nonisolated extension Blueye_Protocol_ObjectDetection: SwiftProtobuf.Message, Sw
 
 nonisolated extension Blueye_Protocol_ModelDetections: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ModelDetections"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}detections\0\u{1}camera\0\u{3}image_width\0\u{3}image_height\0\u{3}model_name\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}detections\0\u{1}camera\0\u{3}image_width\0\u{3}image_height\0\u{3}model_name\0\u{3}frame_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -17043,6 +17077,7 @@ nonisolated extension Blueye_Protocol_ModelDetections: SwiftProtobuf.Message, Sw
       case 3: try { try decoder.decodeSingularUInt32Field(value: &self.imageWidth) }()
       case 4: try { try decoder.decodeSingularUInt32Field(value: &self.imageHeight) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.modelName) }()
+      case 6: try { try decoder.decodeSingularUInt64Field(value: &self.frameID) }()
       default: break
       }
     }
@@ -17064,6 +17099,9 @@ nonisolated extension Blueye_Protocol_ModelDetections: SwiftProtobuf.Message, Sw
     if !self.modelName.isEmpty {
       try visitor.visitSingularStringField(value: self.modelName, fieldNumber: 5)
     }
+    if self.frameID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.frameID, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -17073,6 +17111,7 @@ nonisolated extension Blueye_Protocol_ModelDetections: SwiftProtobuf.Message, Sw
     if lhs.imageWidth != rhs.imageWidth {return false}
     if lhs.imageHeight != rhs.imageHeight {return false}
     if lhs.modelName != rhs.modelName {return false}
+    if lhs.frameID != rhs.frameID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -17225,7 +17264,7 @@ nonisolated extension Blueye_Protocol_OperatorInfo: SwiftProtobuf.Message, Swift
 
 nonisolated extension Blueye_Protocol_SotState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SotState"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0\u{3}bounding_box\0\u{3}image_width\0\u{3}image_height\0\u{1}confidence\0\u{1}vx\0\u{1}vy\0\u{1}vs\0\u{1}vr\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0\u{3}bounding_box\0\u{3}image_width\0\u{3}image_height\0\u{1}confidence\0\u{1}vx\0\u{1}vy\0\u{1}vs\0\u{1}vr\0\u{3}frame_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -17242,6 +17281,7 @@ nonisolated extension Blueye_Protocol_SotState: SwiftProtobuf.Message, SwiftProt
       case 7: try { try decoder.decodeSingularFloatField(value: &self.vy) }()
       case 8: try { try decoder.decodeSingularFloatField(value: &self.vs) }()
       case 9: try { try decoder.decodeSingularFloatField(value: &self.vr) }()
+      case 10: try { try decoder.decodeSingularUInt64Field(value: &self.frameID) }()
       default: break
       }
     }
@@ -17279,6 +17319,9 @@ nonisolated extension Blueye_Protocol_SotState: SwiftProtobuf.Message, SwiftProt
     if self.vr.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.vr, fieldNumber: 9)
     }
+    if self.frameID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.frameID, fieldNumber: 10)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -17292,6 +17335,7 @@ nonisolated extension Blueye_Protocol_SotState: SwiftProtobuf.Message, SwiftProt
     if lhs.vy != rhs.vy {return false}
     if lhs.vs != rhs.vs {return false}
     if lhs.vr != rhs.vr {return false}
+    if lhs.frameID != rhs.frameID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
