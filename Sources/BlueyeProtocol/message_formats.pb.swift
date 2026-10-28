@@ -5574,6 +5574,19 @@ public nonisolated struct Blueye_Protocol_DroneInfo: @unchecked Sendable {
   /// Clears the value of `mainCameraCalibration`. Subsequent reads from it will return its default value.
   public mutating func clearMainCameraCalibration() {_uniqueStorage()._mainCameraCalibration = nil}
 
+  /// Dive number, the counter at the end of the logfile name. 0 when unknown.
+  public var diveNumber: UInt32 {
+    get {_storage._diveNumber}
+    set {_uniqueStorage()._diveNumber = newValue}
+  }
+
+  /// Name of the dive logfile without extension (e.g. BYEDP070012_ea9ac92e040aa9d4_00231).
+  /// Unlike dive_number it stays unique when the counter restarts, e.g. after the storage is replaced.
+  public var logName: String {
+    get {_storage._logName}
+    set {_uniqueStorage()._logName = newValue}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -13048,7 +13061,7 @@ nonisolated extension Blueye_Protocol_CameraCalibration: SwiftProtobuf.Message, 
 
 nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DroneInfo"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}blunux_version\0\u{3}serial_number\0\u{3}hardware_id\0\u{1}model\0\u{3}mb_serial\0\u{3}bb_serial\0\u{3}mb_uid\0\u{3}bb_uid\0\u{1}gp\0\u{3}ds_serial\0\u{3}depth_sensor\0\u{3}cv_models\0\u{3}power_source\0\u{3}main_camera_calibration\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}blunux_version\0\u{3}serial_number\0\u{3}hardware_id\0\u{1}model\0\u{3}mb_serial\0\u{3}bb_serial\0\u{3}mb_uid\0\u{3}bb_uid\0\u{1}gp\0\u{3}ds_serial\0\u{3}depth_sensor\0\u{3}cv_models\0\u{3}power_source\0\u{3}main_camera_calibration\0\u{3}dive_number\0\u{3}log_name\0")
 
   fileprivate class _StorageClass {
     var _blunuxVersion: String = String()
@@ -13065,6 +13078,8 @@ nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftPro
     var _cvModels: [Blueye_Protocol_CvModelInfo] = []
     var _powerSource: Blueye_Protocol_PowerSource = .unspecified
     var _mainCameraCalibration: Blueye_Protocol_CameraCalibration? = nil
+    var _diveNumber: UInt32 = 0
+    var _logName: String = String()
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -13089,6 +13104,8 @@ nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftPro
       _cvModels = source._cvModels
       _powerSource = source._powerSource
       _mainCameraCalibration = source._mainCameraCalibration
+      _diveNumber = source._diveNumber
+      _logName = source._logName
     }
   }
 
@@ -13121,6 +13138,8 @@ nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftPro
         case 12: try { try decoder.decodeRepeatedMessageField(value: &_storage._cvModels) }()
         case 13: try { try decoder.decodeSingularEnumField(value: &_storage._powerSource) }()
         case 14: try { try decoder.decodeSingularMessageField(value: &_storage._mainCameraCalibration) }()
+        case 15: try { try decoder.decodeSingularUInt32Field(value: &_storage._diveNumber) }()
+        case 16: try { try decoder.decodeSingularStringField(value: &_storage._logName) }()
         default: break
         }
       }
@@ -13175,6 +13194,12 @@ nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftPro
       try { if let v = _storage._mainCameraCalibration {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
       } }()
+      if _storage._diveNumber != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._diveNumber, fieldNumber: 15)
+      }
+      if !_storage._logName.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._logName, fieldNumber: 16)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -13198,6 +13223,8 @@ nonisolated extension Blueye_Protocol_DroneInfo: SwiftProtobuf.Message, SwiftPro
         if _storage._cvModels != rhs_storage._cvModels {return false}
         if _storage._powerSource != rhs_storage._powerSource {return false}
         if _storage._mainCameraCalibration != rhs_storage._mainCameraCalibration {return false}
+        if _storage._diveNumber != rhs_storage._diveNumber {return false}
+        if _storage._logName != rhs_storage._logName {return false}
         return true
       }
       if !storagesAreEqual {return false}
