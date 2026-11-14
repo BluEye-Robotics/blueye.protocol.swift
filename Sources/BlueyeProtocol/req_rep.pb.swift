@@ -575,6 +575,62 @@ public nonisolated struct Blueye_Protocol_SetLogFrequencyRep: Sendable {
   public init() {}
 }
 
+/// Request to reset the publishing frequency of a message to the drone's default.
+public nonisolated struct Blueye_Protocol_ResetPubFrequencyReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Message name, f. ex. "AttitudeTel"; empty resets every message.
+  public var messageType: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after resetting the publishing frequency.
+public nonisolated struct Blueye_Protocol_ResetPubFrequencyRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the message name was valid and its frequency reset.
+  public var success: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Request to reset the logging frequency of a message to the drone's default.
+public nonisolated struct Blueye_Protocol_ResetLogFrequencyReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Message name, f. ex. "AttitudeTel"; empty resets every message.
+  public var messageType: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after resetting the logging frequency.
+public nonisolated struct Blueye_Protocol_ResetLogFrequencyRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the message name was valid and its frequency reset.
+  public var success: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 /// Request to get latest telemetry data
 public nonisolated struct Blueye_Protocol_GetTelemetryReq: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -915,6 +971,280 @@ public nonisolated struct Blueye_Protocol_GetMultibeamColorFilterRep: Sendable {
   public init() {}
 
   fileprivate var _colorFilter: Blueye_Protocol_MultibeamColorFilter? = nil
+}
+
+/// Request to catch up on the SLAM map.
+///
+/// Nothing comes in the reply but what is coming: the SLAM publishes it on its own
+/// publisher, to the clients subscribed there. The SLAM keeps its latest map
+/// updates: when map_id is the current map and the updates after have_sequence are
+/// still kept, it publishes those again (SlamMapUpdateTel, as they were, so a client
+/// that has them already skips them by their sequence); otherwise it publishes the
+/// whole map (SlamMapTel, in parts when it is large).
+public nonisolated struct Blueye_Protocol_GetSlamMapReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The map the client holds; 0 when it holds none.
+  public var mapID: UInt32 = 0
+
+  /// The sequence of the last update the client applied to that map.
+  public var haveSequence: UInt64 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after asking to catch up on the SLAM map: what is published for it.
+public nonisolated struct Blueye_Protocol_GetSlamMapRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// The current map (0 when the SLAM has no map).
+  public var mapID: UInt32 = 0
+
+  /// The client has the map at this sequence once it has what is published. The whole map may be one
+  /// made earlier (its parts say their sequence): the updates after it are published again after it.
+  public var sequence: UInt64 = 0
+
+  public var catchUp: Blueye_Protocol_GetSlamMapRep.OneOf_CatchUp? = nil
+
+  /// The updates from from_sequence to sequence are published again (none when from_sequence is past
+  /// sequence: the client has the map already).
+  public var fromSequence: UInt64 {
+    get {
+      if case .fromSequence(let v)? = catchUp {return v}
+      return 0
+    }
+    set {catchUp = .fromSequence(newValue)}
+  }
+
+  /// The whole map is published, in this many SlamMapTel parts.
+  public var partCount: UInt32 {
+    get {
+      if case .partCount(let v)? = catchUp {return v}
+      return 0
+    }
+    set {catchUp = .partCount(newValue)}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public nonisolated enum OneOf_CatchUp: Equatable, Sendable {
+    /// The updates from from_sequence to sequence are published again (none when from_sequence is past
+    /// sequence: the client has the map already).
+    case fromSequence(UInt64)
+    /// The whole map is published, in this many SlamMapTel parts.
+    case partCount(UInt32)
+
+  }
+
+  public init() {}
+}
+
+/// Request to discard the SLAM map and start a new one from the current pose.
+public nonisolated struct Blueye_Protocol_ResetSlamReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The map to discard: the SLAM resets only if it is still the current map, so that two clients
+  /// asking at once start one new map, not two. 0 (map ids never are): only if the SLAM has no map yet.
+  public var mapID: UInt32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after resetting the SLAM map.
+public nonisolated struct Blueye_Protocol_ResetSlamRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// Identifier of the map now (the new one, or the current one when the request's map_id was not
+  /// the current map's); 0 when the SLAM has no map yet (it starts one with its next scan).
+  public var mapID: UInt32 = 0
+
+  /// True if the map was discarded.
+  public var reset: Bool = false
+
+  /// Why the map was not discarded, when it was not.
+  public var error: Blueye_Protocol_SlamRequestError = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Request to start or stop the SLAM.
+///
+/// Starting switches the sensor on (for a sonar, its acoustics) and begins a new
+/// map from the current pose. Stopping switches the sensor off and keeps the map,
+/// so it can still be viewed. Asking for the state the SLAM is in already changes
+/// nothing (ResetSlamReq begins a new map). The SLAM reports its state in
+/// SlamStatusTel.
+public nonisolated struct Blueye_Protocol_SetSlamActiveReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True to start the SLAM, false to stop it.
+  public var active: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after starting or stopping the SLAM.
+public nonisolated struct Blueye_Protocol_SetSlamActiveRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// True if the SLAM is now mapping (false if its sensor did not switch on).
+  public var active: Bool = false
+
+  /// Why the SLAM is not in the state asked for, when it is not.
+  public var error: Blueye_Protocol_SlamRequestError = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Request to start or stop recording the SLAM.
+///
+/// A recording needs the SLAM to be mapping, and stopping the SLAM stops it. It is
+/// stored with the drone's other media (picture, video and multibeam recordings).
+/// Like a multibeam recording it holds the drone's DroneInfoTel, at its start and
+/// when it changes, which names the dive log it belongs with (log_name).
+/// Asking for the state the recording is in already changes nothing.
+public nonisolated struct Blueye_Protocol_SetSlamRecordingReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True to start recording, false to stop.
+  public var record: Bool = false
+
+  /// Also the sensor's raw data, and the dive log faster, for running the SLAM offline.
+  public var sensorData: Bool = false
+
+  /// Where to store the recording.
+  public var storageLocation: Blueye_Protocol_StorageLocation = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Response after starting or stopping a SLAM recording.
+public nonisolated struct Blueye_Protocol_SetSlamRecordingRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// The recording after the request.
+  public var recording: Blueye_Protocol_SlamRecordingState {
+    get {_recording ?? Blueye_Protocol_SlamRecordingState()}
+    set {_recording = newValue}
+  }
+  /// Returns true if `recording` has been explicitly set.
+  public var hasRecording: Bool {self._recording != nil}
+  /// Clears the value of `recording`. Subsequent reads from it will return its default value.
+  public mutating func clearRecording() {self._recording = nil}
+
+  /// Why the recording is not in the state asked for, when it is not.
+  public var error: Blueye_Protocol_SlamRequestError = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _recording: Blueye_Protocol_SlamRecordingState? = nil
+}
+
+/// Request to change the settings of a SLAM sensor.
+///
+/// The settings go to the sensor named by sensor_id. Without one, they go to the
+/// SLAM's sensor of their kind when it has exactly one; with several, the request
+/// must name one (SLAM_REQUEST_ERROR_NO_SUCH_SENSOR otherwise). Settings left
+/// unspecified stay as they are. The map goes on at the resolution it was made
+/// with; the next new map (a start, or ResetSlamReq) takes the resolution the
+/// sensor's range then gives.
+public nonisolated struct Blueye_Protocol_SetSlamSensorSettingsReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The settings to change.
+  public var settings: Blueye_Protocol_SlamSensorSettings {
+    get {_settings ?? Blueye_Protocol_SlamSensorSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  /// The sensor to change (SlamSensor.id); empty: the SLAM's only sensor of the settings' kind.
+  public var sensorID: String = String()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Blueye_Protocol_SlamSensorSettings? = nil
+}
+
+/// Response after changing the settings of a SLAM sensor.
+public nonisolated struct Blueye_Protocol_SetSlamSensorSettingsRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// True if the sensor took the settings.
+  public var applied: Bool = false
+
+  /// The sensor's settings after the request.
+  public var settings: Blueye_Protocol_SlamSensorSettings {
+    get {_settings ?? Blueye_Protocol_SlamSensorSettings()}
+    set {_settings = newValue}
+  }
+  /// Returns true if `settings` has been explicitly set.
+  public var hasSettings: Bool {self._settings != nil}
+  /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+  public mutating func clearSettings() {self._settings = nil}
+
+  /// Why the settings were not applied, when they were not.
+  public var error: Blueye_Protocol_SlamRequestError = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _settings: Blueye_Protocol_SlamSensorSettings? = nil
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1830,6 +2160,126 @@ nonisolated extension Blueye_Protocol_SetLogFrequencyRep: SwiftProtobuf.Message,
   }
 }
 
+nonisolated extension Blueye_Protocol_ResetPubFrequencyReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetPubFrequencyReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}message_type\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.messageType) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.messageType.isEmpty {
+      try visitor.visitSingularStringField(value: self.messageType, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetPubFrequencyReq, rhs: Blueye_Protocol_ResetPubFrequencyReq) -> Bool {
+    if lhs.messageType != rhs.messageType {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ResetPubFrequencyRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetPubFrequencyRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.success) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.success != false {
+      try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetPubFrequencyRep, rhs: Blueye_Protocol_ResetPubFrequencyRep) -> Bool {
+    if lhs.success != rhs.success {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ResetLogFrequencyReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetLogFrequencyReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}message_type\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.messageType) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.messageType.isEmpty {
+      try visitor.visitSingularStringField(value: self.messageType, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetLogFrequencyReq, rhs: Blueye_Protocol_ResetLogFrequencyReq) -> Bool {
+    if lhs.messageType != rhs.messageType {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ResetLogFrequencyRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetLogFrequencyRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}success\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.success) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.success != false {
+      try visitor.visitSingularBoolField(value: self.success, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetLogFrequencyRep, rhs: Blueye_Protocol_ResetLogFrequencyRep) -> Bool {
+    if lhs.success != rhs.success {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 nonisolated extension Blueye_Protocol_GetTelemetryReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".GetTelemetryReq"
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}message_type\0")
@@ -2444,6 +2894,430 @@ nonisolated extension Blueye_Protocol_GetMultibeamColorFilterRep: SwiftProtobuf.
 
   public static func ==(lhs: Blueye_Protocol_GetMultibeamColorFilterRep, rhs: Blueye_Protocol_GetMultibeamColorFilterRep) -> Bool {
     if lhs._colorFilter != rhs._colorFilter {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_GetSlamMapReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetSlamMapReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}map_id\0\u{3}have_sequence\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.mapID) }()
+      case 2: try { try decoder.decodeSingularUInt64Field(value: &self.haveSequence) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.mapID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.mapID, fieldNumber: 1)
+    }
+    if self.haveSequence != 0 {
+      try visitor.visitSingularUInt64Field(value: self.haveSequence, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_GetSlamMapReq, rhs: Blueye_Protocol_GetSlamMapReq) -> Bool {
+    if lhs.mapID != rhs.mapID {return false}
+    if lhs.haveSequence != rhs.haveSequence {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_GetSlamMapRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".GetSlamMapRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{3}map_id\0\u{1}sequence\0\u{3}from_sequence\0\u{3}part_count\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.mapID) }()
+      case 3: try { try decoder.decodeSingularUInt64Field(value: &self.sequence) }()
+      case 4: try {
+        var v: UInt64?
+        try decoder.decodeSingularUInt64Field(value: &v)
+        if let v = v {
+          if self.catchUp != nil {try decoder.handleConflictingOneOf()}
+          self.catchUp = .fromSequence(v)
+        }
+      }()
+      case 5: try {
+        var v: UInt32?
+        try decoder.decodeSingularUInt32Field(value: &v)
+        if let v = v {
+          if self.catchUp != nil {try decoder.handleConflictingOneOf()}
+          self.catchUp = .partCount(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    if self.mapID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.mapID, fieldNumber: 2)
+    }
+    if self.sequence != 0 {
+      try visitor.visitSingularUInt64Field(value: self.sequence, fieldNumber: 3)
+    }
+    switch self.catchUp {
+    case .fromSequence?: try {
+      guard case .fromSequence(let v)? = self.catchUp else { preconditionFailure() }
+      try visitor.visitSingularUInt64Field(value: v, fieldNumber: 4)
+    }()
+    case .partCount?: try {
+      guard case .partCount(let v)? = self.catchUp else { preconditionFailure() }
+      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 5)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_GetSlamMapRep, rhs: Blueye_Protocol_GetSlamMapRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs.mapID != rhs.mapID {return false}
+    if lhs.sequence != rhs.sequence {return false}
+    if lhs.catchUp != rhs.catchUp {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ResetSlamReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetSlamReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}map_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.mapID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.mapID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.mapID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetSlamReq, rhs: Blueye_Protocol_ResetSlamReq) -> Bool {
+    if lhs.mapID != rhs.mapID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ResetSlamRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ResetSlamRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{3}map_id\0\u{1}reset\0\u{1}error\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.mapID) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.reset) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.error) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    if self.mapID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.mapID, fieldNumber: 2)
+    }
+    if self.reset != false {
+      try visitor.visitSingularBoolField(value: self.reset, fieldNumber: 3)
+    }
+    if self.error != .unspecified {
+      try visitor.visitSingularEnumField(value: self.error, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ResetSlamRep, rhs: Blueye_Protocol_ResetSlamRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs.mapID != rhs.mapID {return false}
+    if lhs.reset != rhs.reset {return false}
+    if lhs.error != rhs.error {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamActiveReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamActiveReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}active\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.active) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.active != false {
+      try visitor.visitSingularBoolField(value: self.active, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamActiveReq, rhs: Blueye_Protocol_SetSlamActiveReq) -> Bool {
+    if lhs.active != rhs.active {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamActiveRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamActiveRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{1}active\0\u{1}error\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.active) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.error) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    if self.active != false {
+      try visitor.visitSingularBoolField(value: self.active, fieldNumber: 2)
+    }
+    if self.error != .unspecified {
+      try visitor.visitSingularEnumField(value: self.error, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamActiveRep, rhs: Blueye_Protocol_SetSlamActiveRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs.active != rhs.active {return false}
+    if lhs.error != rhs.error {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamRecordingReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamRecordingReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}record\0\u{3}sensor_data\0\u{3}storage_location\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.record) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.sensorData) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.storageLocation) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.record != false {
+      try visitor.visitSingularBoolField(value: self.record, fieldNumber: 1)
+    }
+    if self.sensorData != false {
+      try visitor.visitSingularBoolField(value: self.sensorData, fieldNumber: 2)
+    }
+    if self.storageLocation != .unspecified {
+      try visitor.visitSingularEnumField(value: self.storageLocation, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamRecordingReq, rhs: Blueye_Protocol_SetSlamRecordingReq) -> Bool {
+    if lhs.record != rhs.record {return false}
+    if lhs.sensorData != rhs.sensorData {return false}
+    if lhs.storageLocation != rhs.storageLocation {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamRecordingRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamRecordingRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{1}recording\0\u{1}error\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._recording) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.error) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    try { if let v = self._recording {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.error != .unspecified {
+      try visitor.visitSingularEnumField(value: self.error, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamRecordingRep, rhs: Blueye_Protocol_SetSlamRecordingRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs._recording != rhs._recording {return false}
+    if lhs.error != rhs.error {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamSensorSettingsReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamSensorSettingsReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}settings\0\u{3}sensor_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.sensorID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.sensorID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sensorID, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamSensorSettingsReq, rhs: Blueye_Protocol_SetSlamSensorSettingsReq) -> Bool {
+    if lhs._settings != rhs._settings {return false}
+    if lhs.sensorID != rhs.sensorID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamSensorSettingsRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamSensorSettingsRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{1}applied\0\u{1}settings\0\u{1}error\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.applied) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.error) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    if self.applied != false {
+      try visitor.visitSingularBoolField(value: self.applied, fieldNumber: 2)
+    }
+    try { if let v = self._settings {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    if self.error != .unspecified {
+      try visitor.visitSingularEnumField(value: self.error, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamSensorSettingsRep, rhs: Blueye_Protocol_SetSlamSensorSettingsRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs.applied != rhs.applied {return false}
+    if lhs._settings != rhs._settings {return false}
+    if lhs.error != rhs.error {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

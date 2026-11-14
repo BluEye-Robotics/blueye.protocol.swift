@@ -4744,7 +4744,7 @@ public nonisolated struct Blueye_Protocol_DvlVelocity: Sendable {
   /// Figure of merit, a measure of the accuracy of the velocities (m/s).
   public var fom: Float = 0
 
-  /// Velocity, x forward, y left, z down (m/s).
+  /// Velocity, x forward, y right, z down (m/s).
   public var velocity: Blueye_Protocol_Vector3 {
     get {_velocity ?? Blueye_Protocol_Vector3()}
     set {_velocity = newValue}
@@ -8637,6 +8637,58 @@ public nonisolated struct Blueye_Protocol_Annotation: Sendable {
   public init() {}
 
   fileprivate var _duration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+}
+
+/// Unit quaternion describing a rotation (Hamilton convention: w + xi + yj + zk).
+///
+/// Where it is a body's orientation, it rotates vectors from the body's frame to
+/// the frame the body is placed in.
+public nonisolated struct Blueye_Protocol_Quaternion: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// X-component of the vector part.
+  public var x: Double = 0
+
+  /// Y-component of the vector part.
+  public var y: Double = 0
+
+  /// Z-component of the vector part.
+  public var z: Double = 0
+
+  /// Scalar part.
+  public var w: Double = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Points packed for use as typed arrays without decoding them one by one.
+///
+/// The frame the positions are in is the one the enclosing message names.
+///
+/// count says how many points the bytes hold: positions is exactly count * 12 bytes,
+/// and intensities either empty or count bytes. A cloud whose bytes disagree with
+/// count is malformed, and is not used.
+public nonisolated struct Blueye_Protocol_PointCloud: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Number of points.
+  public var count: UInt32 = 0
+
+  /// count x, y, z triplets of little-endian float32 (m): 12 bytes per point.
+  public var positions: Data = Data()
+
+  /// count signal strengths, one byte each (0 to 255), or empty when unknown.
+  public var intensities: Data = Data()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -17436,6 +17488,91 @@ nonisolated extension Blueye_Protocol_Annotation: SwiftProtobuf.Message, SwiftPr
     if lhs.body != rhs.body {return false}
     if lhs._duration != rhs._duration {return false}
     if lhs.source != rhs.source {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_Quaternion: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".Quaternion"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}x\0\u{1}y\0\u{1}z\0\u{1}w\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularDoubleField(value: &self.x) }()
+      case 2: try { try decoder.decodeSingularDoubleField(value: &self.y) }()
+      case 3: try { try decoder.decodeSingularDoubleField(value: &self.z) }()
+      case 4: try { try decoder.decodeSingularDoubleField(value: &self.w) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.x.bitPattern != 0 {
+      try visitor.visitSingularDoubleField(value: self.x, fieldNumber: 1)
+    }
+    if self.y.bitPattern != 0 {
+      try visitor.visitSingularDoubleField(value: self.y, fieldNumber: 2)
+    }
+    if self.z.bitPattern != 0 {
+      try visitor.visitSingularDoubleField(value: self.z, fieldNumber: 3)
+    }
+    if self.w.bitPattern != 0 {
+      try visitor.visitSingularDoubleField(value: self.w, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_Quaternion, rhs: Blueye_Protocol_Quaternion) -> Bool {
+    if lhs.x != rhs.x {return false}
+    if lhs.y != rhs.y {return false}
+    if lhs.z != rhs.z {return false}
+    if lhs.w != rhs.w {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_PointCloud: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".PointCloud"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}count\0\u{1}positions\0\u{1}intensities\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.count) }()
+      case 2: try { try decoder.decodeSingularBytesField(value: &self.positions) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.intensities) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.count != 0 {
+      try visitor.visitSingularUInt32Field(value: self.count, fieldNumber: 1)
+    }
+    if !self.positions.isEmpty {
+      try visitor.visitSingularBytesField(value: self.positions, fieldNumber: 2)
+    }
+    if !self.intensities.isEmpty {
+      try visitor.visitSingularBytesField(value: self.intensities, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_PointCloud, rhs: Blueye_Protocol_PointCloud) -> Bool {
+    if lhs.count != rhs.count {return false}
+    if lhs.positions != rhs.positions {return false}
+    if lhs.intensities != rhs.intensities {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
