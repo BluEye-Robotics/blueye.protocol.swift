@@ -487,6 +487,67 @@ public nonisolated struct Blueye_Protocol_ClearMissionCtrl: Sendable {
   public init() {}
 }
 
+/// Clears the mission rules.
+public nonisolated struct Blueye_Protocol_ClearMissionRulesCtrl: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Run a single instruction right away, outside any mission.
+///
+/// Instructions that do not move the drone (camera, tilt, lights, laser, multibeam, tilt
+/// stabilization, CV model, annotation, cruise speed) run in any mission state, alongside a running
+/// mission. Instructions that move the drone (waypoint, go to home, transect, survey, depth set
+/// point, relative depth, go to surface or seabed, control mode, heading) run only while no
+/// mission is running, one at a time, and are rejected otherwise. A wait is rejected. The outcome
+/// is reported in InstructionResultTel with the same request_id.
+public nonisolated struct Blueye_Protocol_RunInstructionCtrl: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Instruction to execute.
+  public var instruction: Blueye_Protocol_Instruction {
+    get {_storage._instruction ?? Blueye_Protocol_Instruction()}
+    set {_uniqueStorage()._instruction = newValue}
+  }
+  /// Returns true if `instruction` has been explicitly set.
+  public var hasInstruction: Bool {_storage._instruction != nil}
+  /// Clears the value of `instruction`. Subsequent reads from it will return its default value.
+  public mutating func clearInstruction() {_uniqueStorage()._instruction = nil}
+
+  /// Client-chosen id, echoed in InstructionResultTel.
+  public var requestID: UInt32 {
+    get {_storage._requestID}
+    set {_uniqueStorage()._requestID = newValue}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// Cancel an instruction started with RunInstructionCtrl.
+public nonisolated struct Blueye_Protocol_CancelInstructionCtrl: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The request_id given to RunInstructionCtrl.
+  public var requestID: UInt32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 /// Issue a command to reset the position estimate.
 public nonisolated struct Blueye_Protocol_ResetPositionCtrl: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -1863,6 +1924,132 @@ nonisolated extension Blueye_Protocol_ClearMissionCtrl: SwiftProtobuf.Message, S
   }
 
   public static func ==(lhs: Blueye_Protocol_ClearMissionCtrl, rhs: Blueye_Protocol_ClearMissionCtrl) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ClearMissionRulesCtrl: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ClearMissionRulesCtrl"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    // Load everything into unknown fields
+    while try decoder.nextFieldNumber() != nil {}
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ClearMissionRulesCtrl, rhs: Blueye_Protocol_ClearMissionRulesCtrl) -> Bool {
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_RunInstructionCtrl: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RunInstructionCtrl"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}instruction\0\u{3}request_id\0")
+
+  fileprivate class _StorageClass {
+    var _instruction: Blueye_Protocol_Instruction? = nil
+    var _requestID: UInt32 = 0
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _instruction = source._instruction
+      _requestID = source._requestID
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._instruction) }()
+        case 2: try { try decoder.decodeSingularUInt32Field(value: &_storage._requestID) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._instruction {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      if _storage._requestID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._requestID, fieldNumber: 2)
+      }
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_RunInstructionCtrl, rhs: Blueye_Protocol_RunInstructionCtrl) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._instruction != rhs_storage._instruction {return false}
+        if _storage._requestID != rhs_storage._requestID {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_CancelInstructionCtrl: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".CancelInstructionCtrl"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}request_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.requestID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.requestID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.requestID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_CancelInstructionCtrl, rhs: Blueye_Protocol_CancelInstructionCtrl) -> Bool {
+    if lhs.requestID != rhs.requestID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

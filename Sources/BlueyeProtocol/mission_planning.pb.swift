@@ -129,6 +129,9 @@ public nonisolated enum Blueye_Protocol_ControlModeHorizontal: SwiftProtobuf.Enu
 
   /// Station keeping control mode.
   case stationKeeping // = 3
+
+  /// Weather vaning control mode (station keeping into the current).
+  case weatherVaning // = 4
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -141,6 +144,7 @@ public nonisolated enum Blueye_Protocol_ControlModeHorizontal: SwiftProtobuf.Enu
     case 1: self = .manual
     case 2: self = .autoHeading
     case 3: self = .stationKeeping
+    case 4: self = .weatherVaning
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -151,6 +155,7 @@ public nonisolated enum Blueye_Protocol_ControlModeHorizontal: SwiftProtobuf.Enu
     case .manual: return 1
     case .autoHeading: return 2
     case .stationKeeping: return 3
+    case .weatherVaning: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -161,6 +166,109 @@ public nonisolated enum Blueye_Protocol_ControlModeHorizontal: SwiftProtobuf.Enu
     .manual,
     .autoHeading,
     .stationKeeping,
+    .weatherVaning,
+  ]
+
+}
+
+/// Which condition a Trigger carries. The values are the field numbers of the Trigger oneof.
+public nonisolated enum Blueye_Protocol_TriggerKind: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// No condition is set.
+  case unspecified // = 0
+
+  /// A DetectionTrigger.
+  case detection // = 1
+
+  /// A DepthTrigger.
+  case depth // = 2
+
+  /// An AltitudeTrigger.
+  case altitude // = 3
+
+  /// A LocationTrigger.
+  case location // = 4
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .detection
+    case 2: self = .depth
+    case 3: self = .altitude
+    case 4: self = .location
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .detection: return 1
+    case .depth: return 2
+    case .altitude: return 3
+    case .location: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_TriggerKind] = [
+    .unspecified,
+    .detection,
+    .depth,
+    .altitude,
+    .location,
+  ]
+
+}
+
+/// Which lights a LightsCommand applies to.
+public nonisolated enum Blueye_Protocol_LightTarget: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified, treated as the main lights.
+  case unspecified // = 0
+
+  /// The drone's own lights.
+  case main // = 1
+
+  /// Lights connected to a guest port.
+  case guestport // = 2
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .main
+    case 2: self = .guestport
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .main: return 1
+    case .guestport: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_LightTarget] = [
+    .unspecified,
+    .main,
+    .guestport,
   ]
 
 }
@@ -279,6 +387,42 @@ public nonisolated enum Blueye_Protocol_InstructionType: SwiftProtobuf.Enum, Swi
 
   /// Execute a survey pattern over a polygon area.
   case survey // = 13
+
+  /// Start or stop multibeam recording.
+  case recordMultibeam // = 14
+
+  /// Start or stop the multibeam driver.
+  case activateMultibeam // = 15
+
+  /// Change the multibeam configuration.
+  case setMultibeamConfig // = 16
+
+  /// Set the lights.
+  case setLights // = 17
+
+  /// Set the laser.
+  case setLaser // = 18
+
+  /// Enable or disable tilt stabilization.
+  case setTiltStabilization // = 19
+
+  /// Start or stop a computer vision model.
+  case setCvModel // = 20
+
+  /// Record an annotation.
+  case annotation // = 21
+
+  /// Turn to a heading.
+  case goToHeading // = 22
+
+  /// Drive a straight line.
+  case transect // = 23
+
+  /// Change the depth by an amount.
+  case goToRelativeDepth // = 24
+
+  /// Change the cruise speed.
+  case setCruiseSpeed // = 25
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -301,6 +445,18 @@ public nonisolated enum Blueye_Protocol_InstructionType: SwiftProtobuf.Enum, Swi
     case 11: self = .goToSeabed
     case 12: self = .goToHome
     case 13: self = .survey
+    case 14: self = .recordMultibeam
+    case 15: self = .activateMultibeam
+    case 16: self = .setMultibeamConfig
+    case 17: self = .setLights
+    case 18: self = .setLaser
+    case 19: self = .setTiltStabilization
+    case 20: self = .setCvModel
+    case 21: self = .annotation
+    case 22: self = .goToHeading
+    case 23: self = .transect
+    case 24: self = .goToRelativeDepth
+    case 25: self = .setCruiseSpeed
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -321,6 +477,18 @@ public nonisolated enum Blueye_Protocol_InstructionType: SwiftProtobuf.Enum, Swi
     case .goToSeabed: return 11
     case .goToHome: return 12
     case .survey: return 13
+    case .recordMultibeam: return 14
+    case .activateMultibeam: return 15
+    case .setMultibeamConfig: return 16
+    case .setLights: return 17
+    case .setLaser: return 18
+    case .setTiltStabilization: return 19
+    case .setCvModel: return 20
+    case .annotation: return 21
+    case .goToHeading: return 22
+    case .transect: return 23
+    case .goToRelativeDepth: return 24
+    case .setCruiseSpeed: return 25
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -341,6 +509,18 @@ public nonisolated enum Blueye_Protocol_InstructionType: SwiftProtobuf.Enum, Swi
     .goToSeabed,
     .goToHome,
     .survey,
+    .recordMultibeam,
+    .activateMultibeam,
+    .setMultibeamConfig,
+    .setLights,
+    .setLaser,
+    .setTiltStabilization,
+    .setCvModel,
+    .annotation,
+    .goToHeading,
+    .transect,
+    .goToRelativeDepth,
+    .setCruiseSpeed,
   ]
 
 }
@@ -426,6 +606,266 @@ public nonisolated enum Blueye_Protocol_MissionState: SwiftProtobuf.Enum, Swift.
 
 }
 
+/// How a mission run ended.
+public nonisolated enum Blueye_Protocol_MissionResult: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// No mission has ended since the drone started.
+  case unspecified // = 0
+
+  /// The run reached the end of the mission. Instructions can have been skipped on the way, for a device
+  /// that is not connected: see MissionOutcome.skipped_instruction_ids.
+  case completed // = 1
+
+  /// The drone stopped the mission, see MissionOutcome.abort_reason.
+  case aborted // = 2
+
+  /// A client cleared or replaced the mission while it was running or paused.
+  case cancelled // = 3
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .completed
+    case 2: self = .aborted
+    case 3: self = .cancelled
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .completed: return 1
+    case .aborted: return 2
+    case .cancelled: return 3
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_MissionResult] = [
+    .unspecified,
+    .completed,
+    .aborted,
+    .cancelled,
+  ]
+
+}
+
+/// Why the drone aborted a mission. A client that does not know a value treats it as unspecified.
+public nonisolated enum Blueye_Protocol_MissionAbortReason: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified, see MissionOutcome.reason.
+  case unspecified // = 0
+
+  /// A control mode the instruction needs was refused or lost.
+  case controlModeLost // = 1
+
+  /// The instruction needs the drone's position, which is unknown.
+  case positionUnknown // = 2
+
+  /// The drone stopped making progress towards its target.
+  case stuck // = 3
+
+  /// A waypoint is farther away than the drone goes.
+  case waypointTooFar // = 4
+
+  /// A turn needs the drone's heading, which is unknown.
+  case headingUnknown // = 5
+
+  /// A turn did not reach its heading in time.
+  case headingNotReached // = 6
+
+  /// A camera, multibeam or other device did not confirm a command in time.
+  case deviceTimeout // = 7
+
+  /// The time left to complete the mission grew past the limit.
+  case durationTooLong // = 8
+
+  /// The drone's supervisor stopped the mission: the pilot took control, the controlling client stopped
+  /// answering, or the drone lost its position or attitude.
+  case supervisor // = 9
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .controlModeLost
+    case 2: self = .positionUnknown
+    case 3: self = .stuck
+    case 4: self = .waypointTooFar
+    case 5: self = .headingUnknown
+    case 6: self = .headingNotReached
+    case 7: self = .deviceTimeout
+    case 8: self = .durationTooLong
+    case 9: self = .supervisor
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .controlModeLost: return 1
+    case .positionUnknown: return 2
+    case .stuck: return 3
+    case .waypointTooFar: return 4
+    case .headingUnknown: return 5
+    case .headingNotReached: return 6
+    case .deviceTimeout: return 7
+    case .durationTooLong: return 8
+    case .supervisor: return 9
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_MissionAbortReason] = [
+    .unspecified,
+    .controlModeLost,
+    .positionUnknown,
+    .stuck,
+    .waypointTooFar,
+    .headingUnknown,
+    .headingNotReached,
+    .deviceTimeout,
+    .durationTooLong,
+    .supervisor,
+  ]
+
+}
+
+/// Outcome of an instruction started with RunInstructionCtrl.
+public nonisolated enum Blueye_Protocol_InstructionResultState: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified.
+  case unspecified // = 0
+
+  /// The instruction was accepted and has started.
+  case accepted // = 1
+
+  /// The instruction was not started, see reason.
+  case rejected // = 2
+
+  /// The instruction completed.
+  case completed // = 3
+
+  /// The instruction stopped before completing, see reason.
+  case failed // = 4
+
+  /// The instruction was cancelled by a client or by the drone.
+  case cancelled // = 5
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .accepted
+    case 2: self = .rejected
+    case 3: self = .completed
+    case 4: self = .failed
+    case 5: self = .cancelled
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .accepted: return 1
+    case .rejected: return 2
+    case .completed: return 3
+    case .failed: return 4
+    case .cancelled: return 5
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_InstructionResultState] = [
+    .unspecified,
+    .accepted,
+    .rejected,
+    .completed,
+    .failed,
+    .cancelled,
+  ]
+
+}
+
+/// MissionRuleState is where a rule is in its episode.
+public nonisolated enum Blueye_Protocol_MissionRuleState: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified.
+  case unspecified // = 0
+
+  /// Waiting for the trigger.
+  case idle // = 1
+
+  /// The rule has fired and has not released yet.
+  case active // = 2
+
+  /// Released; waiting for the cooldown before it can fire again.
+  case cooldown // = 3
+
+  /// The rule is disabled.
+  case disabled // = 4
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .idle
+    case 2: self = .active
+    case 3: self = .cooldown
+    case 4: self = .disabled
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .idle: return 1
+    case .active: return 2
+    case .cooldown: return 3
+    case .disabled: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_MissionRuleState] = [
+    .unspecified,
+    .idle,
+    .active,
+    .cooldown,
+    .disabled,
+  ]
+
+}
+
 /// A list of waypoints describes a mission that the auto pilot can execute.
 public nonisolated struct Blueye_Protocol_Mission: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -459,6 +899,19 @@ public nonisolated struct Blueye_Protocol_Mission: Sendable {
   /// Default circle of acceptance for waypoints (m) (optional).
   public var defaultCircleOfAcceptance: Float = 0
 
+  /// Set by the drone, increases with every accepted SetInstructionUpdateReq.
+  public var revision: UInt32 = 0
+
+  /// Client-defined identifier of the mission, such as a UUID, for clients to match the drone's status with
+  /// their own records (optional, at most 64 characters). The drone keeps it through instruction updates and
+  /// echoes it in GetMissionRep, MissionStatus and MissionOutcome. It does not tell loads apart: see load_id.
+  public var uuid: String = String()
+
+  /// Set by the drone: a random id it draws for every mission it loads, from 1 to 2^53 - 1 so that clients that
+  /// hold numbers as doubles, such as JavaScript, read it exactly. An instruction update names it
+  /// (SetInstructionUpdateReq.load_id), so it cannot change a mission loaded since. Ignored in SetMissionReq.
+  public var loadID: UInt64 = 0
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -475,8 +928,8 @@ public nonisolated struct Blueye_Protocol_Instruction: Sendable {
   /// Group id used for polygons.
   public var groupID: UInt32 = 0
 
-  /// False will pause the mission after this instruction.
-  public var autoContinue: Bool = false
+  /// Pause the mission after this instruction. RunMissionCtrl continues it.
+  public var pauseOnCompletion: Bool = false
 
   public var command: Blueye_Protocol_Instruction.OneOf_Command? = nil
 
@@ -579,6 +1032,114 @@ public nonisolated struct Blueye_Protocol_Instruction: Sendable {
     set {command = .surveyCommand(newValue)}
   }
 
+  /// Start or stop multibeam recording.
+  public var recordMultibeamCommand: Blueye_Protocol_RecordMultibeamCommand {
+    get {
+      if case .recordMultibeamCommand(let v)? = command {return v}
+      return Blueye_Protocol_RecordMultibeamCommand()
+    }
+    set {command = .recordMultibeamCommand(newValue)}
+  }
+
+  /// Start or stop the multibeam driver.
+  public var activateMultibeamCommand: Blueye_Protocol_ActivateMultibeamCommand {
+    get {
+      if case .activateMultibeamCommand(let v)? = command {return v}
+      return Blueye_Protocol_ActivateMultibeamCommand()
+    }
+    set {command = .activateMultibeamCommand(newValue)}
+  }
+
+  /// Change the multibeam configuration.
+  public var multibeamConfigCommand: Blueye_Protocol_MultibeamConfigCommand {
+    get {
+      if case .multibeamConfigCommand(let v)? = command {return v}
+      return Blueye_Protocol_MultibeamConfigCommand()
+    }
+    set {command = .multibeamConfigCommand(newValue)}
+  }
+
+  /// Set the main or guest port lights.
+  public var lightsCommand: Blueye_Protocol_LightsCommand {
+    get {
+      if case .lightsCommand(let v)? = command {return v}
+      return Blueye_Protocol_LightsCommand()
+    }
+    set {command = .lightsCommand(newValue)}
+  }
+
+  /// Set the laser.
+  public var laserCommand: Blueye_Protocol_LaserCommand {
+    get {
+      if case .laserCommand(let v)? = command {return v}
+      return Blueye_Protocol_LaserCommand()
+    }
+    set {command = .laserCommand(newValue)}
+  }
+
+  /// Enable or disable tilt stabilization.
+  public var tiltStabilizationCommand: Blueye_Protocol_TiltStabilizationCommand {
+    get {
+      if case .tiltStabilizationCommand(let v)? = command {return v}
+      return Blueye_Protocol_TiltStabilizationCommand()
+    }
+    set {command = .tiltStabilizationCommand(newValue)}
+  }
+
+  /// Start or stop a computer vision model.
+  public var cvModelStateCommand: Blueye_Protocol_CvModelStateCommand {
+    get {
+      if case .cvModelStateCommand(let v)? = command {return v}
+      return Blueye_Protocol_CvModelStateCommand()
+    }
+    set {command = .cvModelStateCommand(newValue)}
+  }
+
+  /// Record an annotation in the dive log.
+  public var annotationCommand: Blueye_Protocol_AnnotationCommand {
+    get {
+      if case .annotationCommand(let v)? = command {return v}
+      return Blueye_Protocol_AnnotationCommand()
+    }
+    set {command = .annotationCommand(newValue)}
+  }
+
+  /// Turn to a heading and hold it.
+  public var headingCommand: Blueye_Protocol_HeadingCommand {
+    get {
+      if case .headingCommand(let v)? = command {return v}
+      return Blueye_Protocol_HeadingCommand()
+    }
+    set {command = .headingCommand(newValue)}
+  }
+
+  /// Drive a straight line on a course for a distance.
+  public var transectCommand: Blueye_Protocol_TransectCommand {
+    get {
+      if case .transectCommand(let v)? = command {return v}
+      return Blueye_Protocol_TransectCommand()
+    }
+    set {command = .transectCommand(newValue)}
+  }
+
+  /// Change the depth by an amount.
+  public var relativeDepthCommand: Blueye_Protocol_RelativeDepthCommand {
+    get {
+      if case .relativeDepthCommand(let v)? = command {return v}
+      return Blueye_Protocol_RelativeDepthCommand()
+    }
+    set {command = .relativeDepthCommand(newValue)}
+  }
+
+  /// Change the cruise speed for the rest of the mission.
+  public var cruiseSpeedCommand: Blueye_Protocol_CruiseSpeedCommand {
+    get {
+      if case .cruiseSpeedCommand(let v)? = command {return v}
+      return Blueye_Protocol_CruiseSpeedCommand()
+    }
+    set {command = .cruiseSpeedCommand(newValue)}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public nonisolated enum OneOf_Command: Equatable, Sendable {
@@ -604,6 +1165,30 @@ public nonisolated struct Blueye_Protocol_Instruction: Sendable {
     case goToHomeCommand(Blueye_Protocol_GoToHomeCommand)
     /// Execute a survey pattern over a polygon area.
     case surveyCommand(Blueye_Protocol_SurveyCommand)
+    /// Start or stop multibeam recording.
+    case recordMultibeamCommand(Blueye_Protocol_RecordMultibeamCommand)
+    /// Start or stop the multibeam driver.
+    case activateMultibeamCommand(Blueye_Protocol_ActivateMultibeamCommand)
+    /// Change the multibeam configuration.
+    case multibeamConfigCommand(Blueye_Protocol_MultibeamConfigCommand)
+    /// Set the main or guest port lights.
+    case lightsCommand(Blueye_Protocol_LightsCommand)
+    /// Set the laser.
+    case laserCommand(Blueye_Protocol_LaserCommand)
+    /// Enable or disable tilt stabilization.
+    case tiltStabilizationCommand(Blueye_Protocol_TiltStabilizationCommand)
+    /// Start or stop a computer vision model.
+    case cvModelStateCommand(Blueye_Protocol_CvModelStateCommand)
+    /// Record an annotation in the dive log.
+    case annotationCommand(Blueye_Protocol_AnnotationCommand)
+    /// Turn to a heading and hold it.
+    case headingCommand(Blueye_Protocol_HeadingCommand)
+    /// Drive a straight line on a course for a distance.
+    case transectCommand(Blueye_Protocol_TransectCommand)
+    /// Change the depth by an amount.
+    case relativeDepthCommand(Blueye_Protocol_RelativeDepthCommand)
+    /// Change the cruise speed for the rest of the mission.
+    case cruiseSpeedCommand(Blueye_Protocol_CruiseSpeedCommand)
 
   }
 
@@ -691,6 +1276,363 @@ public nonisolated struct Blueye_Protocol_ControlModeCommand: Sendable {
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
+}
+
+/// DetectionTrigger is satisfied by what the computer vision models see.
+///
+/// The trigger is satisfied while at least one detection of the running models matches all of the
+/// filters below. The models have to be running; a trigger for a model that is not running is not
+/// satisfied and TriggerStatus reports sensor_unavailable.
+public nonisolated struct Blueye_Protocol_DetectionTrigger: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Any of these class names; empty matches every class.
+  public var classNames: [String] = []
+
+  /// Only detections from this model; empty matches every model.
+  public var modelName: String = String()
+
+  /// Only detections from this camera; unspecified matches every camera.
+  public var camera: Blueye_Protocol_Camera = .unspecified
+
+  /// Detections below this confidence are ignored (0..1).
+  public var minConfidence: Float = 0
+
+  /// Least bounding box area over image area a detection must have (0..1).
+  public var minAreaFraction: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// DepthTrigger is satisfied while the drone is between two depths below the surface.
+///
+/// A depth with a tolerance is the two bounds around it: 9 and 11 for ten metres give or take a
+/// metre. Leaving max_depth at zero gives no upper bound, so a min_depth of 20 on its own is
+/// satisfied deeper than 20 m. Neither bound may be negative, and a max_depth that is set has to be
+/// above min_depth: the two are the edges of a band, not a single depth, and a rule whose band has
+/// no width is refused rather than left never firing. The drone measures its depth from the moment
+/// it is powered on, so this trigger reports sensor_unavailable only while no depth has reached the
+/// mission at all.
+public nonisolated struct Blueye_Protocol_DepthTrigger: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Shallowest depth that satisfies the trigger (m below the surface).
+  public var minDepth: Float = 0
+
+  /// Deepest depth that satisfies the trigger (m). Zero means no upper bound.
+  public var maxDepth: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// AltitudeTrigger is satisfied while the drone is between two heights above the seabed.
+///
+/// A height with a tolerance is the two bounds around it: 2.5 and 3.5 for three metres off the
+/// bottom give or take half a metre. Leaving max_altitude at zero gives no upper bound. Neither
+/// bound may be negative, and a max_altitude that is set has to be above min_altitude, as for
+/// DepthTrigger. The height comes from a DVL or an altimeter; with neither mounted, out of its
+/// range, or with a reading the drone does not trust, the trigger is simply not satisfied and
+/// TriggerStatus reports sensor_unavailable.
+public nonisolated struct Blueye_Protocol_AltitudeTrigger: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Lowest height above the seabed that satisfies the trigger (m).
+  public var minAltitude: Float = 0
+
+  /// Highest height that satisfies the trigger (m). Zero means no upper bound.
+  public var maxAltitude: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// LocationTrigger is satisfied while the drone is inside a circle around a position.
+///
+/// Entering the circle makes the trigger satisfied and leaving it makes it unsatisfied, so a rule
+/// with one location trigger can start a recording in its enter instructions and stop it in its exit
+/// instructions. Any valid position estimate will do, whichever sensors it is built from; while the
+/// drone has none the trigger is simply not satisfied and TriggerStatus reports sensor_unavailable.
+public nonisolated struct Blueye_Protocol_LocationTrigger: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Centre of the circle (decimal degrees).
+  public var position: Blueye_Protocol_LatLongPosition {
+    get {_position ?? Blueye_Protocol_LatLongPosition()}
+    set {_position = newValue}
+  }
+  /// Returns true if `position` has been explicitly set.
+  public var hasPosition: Bool {self._position != nil}
+  /// Clears the value of `position`. Subsequent reads from it will return its default value.
+  public mutating func clearPosition() {self._position = nil}
+
+  /// Radius of the circle around the position (m). Must be above zero.
+  public var circleOfAcceptance: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _position: Blueye_Protocol_LatLongPosition? = nil
+}
+
+/// Trigger is one condition of a mission rule.
+public nonisolated struct Blueye_Protocol_Trigger: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var condition: Blueye_Protocol_Trigger.OneOf_Condition? = nil
+
+  /// Satisfied by a detection from a computer vision model.
+  public var detectionTrigger: Blueye_Protocol_DetectionTrigger {
+    get {
+      if case .detectionTrigger(let v)? = condition {return v}
+      return Blueye_Protocol_DetectionTrigger()
+    }
+    set {condition = .detectionTrigger(newValue)}
+  }
+
+  /// Satisfied at a depth below the surface.
+  public var depthTrigger: Blueye_Protocol_DepthTrigger {
+    get {
+      if case .depthTrigger(let v)? = condition {return v}
+      return Blueye_Protocol_DepthTrigger()
+    }
+    set {condition = .depthTrigger(newValue)}
+  }
+
+  /// Satisfied at a height above the seabed.
+  public var altitudeTrigger: Blueye_Protocol_AltitudeTrigger {
+    get {
+      if case .altitudeTrigger(let v)? = condition {return v}
+      return Blueye_Protocol_AltitudeTrigger()
+    }
+    set {condition = .altitudeTrigger(newValue)}
+  }
+
+  /// Satisfied inside a circle around a position.
+  public var locationTrigger: Blueye_Protocol_LocationTrigger {
+    get {
+      if case .locationTrigger(let v)? = condition {return v}
+      return Blueye_Protocol_LocationTrigger()
+    }
+    set {condition = .locationTrigger(newValue)}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public nonisolated enum OneOf_Condition: Equatable, Sendable {
+    /// Satisfied by a detection from a computer vision model.
+    case detectionTrigger(Blueye_Protocol_DetectionTrigger)
+    /// Satisfied at a depth below the surface.
+    case depthTrigger(Blueye_Protocol_DepthTrigger)
+    /// Satisfied at a height above the seabed.
+    case altitudeTrigger(Blueye_Protocol_AltitudeTrigger)
+    /// Satisfied inside a circle around a position.
+    case locationTrigger(Blueye_Protocol_LocationTrigger)
+
+  }
+
+  public init() {}
+}
+
+/// MissionRule runs instructions when all of its triggers are satisfied at once and when they stop
+/// being so. A drone runs at most 16 rules with at most 8 triggers and 8 instructions per list, and
+/// a rule has to carry at least one instruction in one of its lists. A rule with no triggers never
+/// fires. Instructions that move the drone (waypoint, go to home,
+/// transect, survey, depth set point, relative depth, go to surface or seabed, control mode,
+/// heading) and waits are refused in rules; camera, tilt, lights, laser, multibeam, tilt
+/// stabilization, CV model, annotation and cruise speed are allowed.
+public nonisolated struct Blueye_Protocol_MissionRule: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Rule id, defined by the client. Must be greater than zero and unique.
+  public var id: UInt32 = 0
+
+  /// Rule name, for the log and the app.
+  public var name: String = String()
+
+  /// A disabled rule never fires. Rules run unless this is set.
+  public var disabled: Bool = false
+
+  /// Run when the rule fires.
+  public var enterInstructions: [Blueye_Protocol_Instruction] = []
+
+  /// Run when the rule releases.
+  public var exitInstructions: [Blueye_Protocol_Instruction] = []
+
+  /// Conditions that must all be satisfied at once for the rule to fire.
+  public var triggers: [Blueye_Protocol_Trigger] = []
+
+  /// How long all the triggers must stay satisfied before the rule fires. At most an hour.
+  public var holdDuration: SwiftProtobuf.Google_Protobuf_Duration {
+    get {_holdDuration ?? SwiftProtobuf.Google_Protobuf_Duration()}
+    set {_holdDuration = newValue}
+  }
+  /// Returns true if `holdDuration` has been explicitly set.
+  public var hasHoldDuration: Bool {self._holdDuration != nil}
+  /// Clears the value of `holdDuration`. Subsequent reads from it will return its default value.
+  public mutating func clearHoldDuration() {self._holdDuration = nil}
+
+  /// How long a trigger must stay unsatisfied before the rule releases. At most an hour.
+  public var releaseDuration: SwiftProtobuf.Google_Protobuf_Duration {
+    get {_releaseDuration ?? SwiftProtobuf.Google_Protobuf_Duration()}
+    set {_releaseDuration = newValue}
+  }
+  /// Returns true if `releaseDuration` has been explicitly set.
+  public var hasReleaseDuration: Bool {self._releaseDuration != nil}
+  /// Clears the value of `releaseDuration`. Subsequent reads from it will return its default value.
+  public mutating func clearReleaseDuration() {self._releaseDuration = nil}
+
+  /// Time after a release before the rule can fire again. At most an hour.
+  public var cooldownDuration: SwiftProtobuf.Google_Protobuf_Duration {
+    get {_cooldownDuration ?? SwiftProtobuf.Google_Protobuf_Duration()}
+    set {_cooldownDuration = newValue}
+  }
+  /// Returns true if `cooldownDuration` has been explicitly set.
+  public var hasCooldownDuration: Bool {self._cooldownDuration != nil}
+  /// Clears the value of `cooldownDuration`. Subsequent reads from it will return its default value.
+  public mutating func clearCooldownDuration() {self._cooldownDuration = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _holdDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+  fileprivate var _releaseDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+  fileprivate var _cooldownDuration: SwiftProtobuf.Google_Protobuf_Duration? = nil
+}
+
+/// MissionRuleStatus is the state of one rule.
+public nonisolated struct Blueye_Protocol_MissionRuleStatus: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Rule id.
+  public var id: UInt32 = 0
+
+  /// What the rule is doing.
+  public var state: Blueye_Protocol_MissionRuleState = .unspecified
+
+  /// Times the rule has fired since it was set.
+  public var episodes: UInt32 = 0
+
+  /// When the rule last fired; unset before the first time.
+  public var lastFired: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_lastFired ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_lastFired = newValue}
+  }
+  /// Returns true if `lastFired` has been explicitly set.
+  public var hasLastFired: Bool {self._lastFired != nil}
+  /// Clears the value of `lastFired`. Subsequent reads from it will return its default value.
+  public mutating func clearLastFired() {self._lastFired = nil}
+
+  /// Outcome of the last instruction the rule ran.
+  public var lastResult: Blueye_Protocol_InstructionResultState = .unspecified
+
+  /// Reason of the last result, when there is one.
+  public var lastReason: String = String()
+
+  /// One entry per trigger, in the order the rule lists them.
+  public var triggers: [Blueye_Protocol_TriggerStatus] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _lastFired: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
+/// TriggerStatus is the state of one trigger of a rule, so a client can show which condition is
+/// holding the rule back.
+public nonisolated struct Blueye_Protocol_TriggerStatus: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Which condition the trigger carries.
+  public var kind: Blueye_Protocol_TriggerKind = .unspecified
+
+  /// True while the condition holds.
+  public var satisfied: Bool = false
+
+  /// True while the drone has no reading to judge the condition by.
+  public var sensorUnavailable: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// InsertInstruction adds an instruction to the loaded mission. It must say where: an insert that sets
+/// neither before_id nor append true is refused.
+public nonisolated struct Blueye_Protocol_InsertInstruction: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The instruction to add. Its id must be new to the mission.
+  public var instruction: Blueye_Protocol_Instruction {
+    get {_storage._instruction ?? Blueye_Protocol_Instruction()}
+    set {_uniqueStorage()._instruction = newValue}
+  }
+  /// Returns true if `instruction` has been explicitly set.
+  public var hasInstruction: Bool {_storage._instruction != nil}
+  /// Clears the value of `instruction`. Subsequent reads from it will return its default value.
+  public mutating func clearInstruction() {_uniqueStorage()._instruction = nil}
+
+  public var placement: OneOf_Placement? {
+    get {return _storage._placement}
+    set {_uniqueStorage()._placement = newValue}
+  }
+
+  /// Id of the instruction to insert in front of.
+  public var beforeID: UInt32 {
+    get {
+      if case .beforeID(let v)? = _storage._placement {return v}
+      return 0
+    }
+    set {_uniqueStorage()._placement = .beforeID(newValue)}
+  }
+
+  /// True adds the instruction at the end of the mission.
+  public var append: Bool {
+    get {
+      if case .append(let v)? = _storage._placement {return v}
+      return false
+    }
+    set {_uniqueStorage()._placement = .append(newValue)}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public nonisolated enum OneOf_Placement: Equatable, Sendable {
+    /// Id of the instruction to insert in front of.
+    case beforeID(UInt32)
+    /// True adds the instruction at the end of the mission.
+    case append(Bool)
+
+  }
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 /// A WaypointCommand will request the drone to drive to a point automatically.
@@ -811,6 +1753,12 @@ public nonisolated struct Blueye_Protocol_CameraCommand: Sendable {
   /// Used for taking photos based on a time or distance interval.
   public var actionParam: Float = 0
 
+  /// Which camera the action applies to. The main camera when unspecified or unrecognised.
+  public var camera: Blueye_Protocol_Camera = .unspecified
+
+  /// Where to store the photos or the recording. Internal when unspecified.
+  public var storageLocation: Blueye_Protocol_StorageLocation = .unspecified
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -852,6 +1800,298 @@ public nonisolated struct Blueye_Protocol_GoToHomeCommand: Sendable {
 
   /// Desired speed to home (m/s).
   public var desiredSpeed: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// RecordMultibeamCommand starts or stops recording of the multibeam sonar.
+public nonisolated struct Blueye_Protocol_RecordMultibeamCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True to start recording, false to stop.
+  public var enable: Bool = false
+
+  /// Where to store the recording. Internal when unspecified.
+  public var storageLocation: Blueye_Protocol_StorageLocation = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// ActivateMultibeamCommand starts or stops the multibeam sonar driver, as ActivateMultibeamCtrl and
+/// DeactivateMultibeamCtrl do.
+///
+/// The instruction completes when the driver reports the requested state, so a following
+/// RecordMultibeamCommand or TiltMultibeamCommand finds the sonar ready.
+public nonisolated struct Blueye_Protocol_ActivateMultibeamCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True to start the driver, false to stop it.
+  public var activate: Bool = false
+
+  /// Configuration to start with. When left out, the last known configuration is used.
+  public var config: Blueye_Protocol_MultibeamConfig {
+    get {_config ?? Blueye_Protocol_MultibeamConfig()}
+    set {_config = newValue}
+  }
+  /// Returns true if `config` has been explicitly set.
+  public var hasConfig: Bool {self._config != nil}
+  /// Clears the value of `config`. Subsequent reads from it will return its default value.
+  public mutating func clearConfig() {self._config = nil}
+
+  /// The sonar `config` was made for, as the multibeam driver reports it. The driver still starts or
+  /// stops when a different sonar is connected, but `config` is skipped in favour of the last
+  /// configuration the driver reported and the drone sends a
+  /// NOTIFICATION_TYPE_MULTIBEAM_SONAR_MISMATCH notification. Unspecified applies `config` to
+  /// whichever sonar is connected. A `config` that the sonar cannot run, measured the same way as
+  /// for MultibeamConfigCommand, skips the whole instruction instead, so the driver is never
+  /// started with a configuration nobody asked for.
+  public var expectedDeviceID: Blueye_Protocol_GuestPortDeviceID = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _config: Blueye_Protocol_MultibeamConfig? = nil
+}
+
+/// MultibeamConfigCommand changes the configuration of a running multibeam sonar.
+///
+/// A configuration is made for one sonar, because ranges, frequencies and beam counts differ between
+/// them. The drone compares expected_device_id with the sonar the multibeam driver reports, not with
+/// what the guest port discovery found, and when they differ it skips the whole instruction and
+/// sends a NOTIFICATION_TYPE_MULTIBEAM_SONAR_MISMATCH notification; the mission carries on with the
+/// next instruction. Unspecified applies the configuration to whichever sonar is connected.
+///
+/// The configuration is also measured against what that sonar can do: the range for the frequency
+/// mode asked for, a high frequency mode on a sonar that has only one, and the number of beams. A
+/// configuration outside them skips the instruction with a reason naming the sonar. Nothing is
+/// quietly clamped, so a sonar never ends up running a configuration nobody asked for.
+public nonisolated struct Blueye_Protocol_MultibeamConfigCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The configuration to apply.
+  public var config: Blueye_Protocol_MultibeamConfig {
+    get {_config ?? Blueye_Protocol_MultibeamConfig()}
+    set {_config = newValue}
+  }
+  /// Returns true if `config` has been explicitly set.
+  public var hasConfig: Bool {self._config != nil}
+  /// Clears the value of `config`. Subsequent reads from it will return its default value.
+  public mutating func clearConfig() {self._config = nil}
+
+  /// The sonar this configuration was made for.
+  public var expectedDeviceID: Blueye_Protocol_GuestPortDeviceID = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _config: Blueye_Protocol_MultibeamConfig? = nil
+}
+
+/// LightsCommand sets the intensity of the main or guest port lights, as LightsCtrl and GuestportLightsCtrl do.
+public nonisolated struct Blueye_Protocol_LightsCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Light intensity (0..1).
+  public var lights: Blueye_Protocol_Lights {
+    get {_lights ?? Blueye_Protocol_Lights()}
+    set {_lights = newValue}
+  }
+  /// Returns true if `lights` has been explicitly set.
+  public var hasLights: Bool {self._lights != nil}
+  /// Clears the value of `lights`. Subsequent reads from it will return its default value.
+  public mutating func clearLights() {self._lights = nil}
+
+  /// Which lights to set. The main lights when unspecified or unrecognised.
+  public var target: Blueye_Protocol_LightTarget = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _lights: Blueye_Protocol_Lights? = nil
+}
+
+/// LaserCommand sets the laser connected to a guest port, as LaserCtrl does.
+public nonisolated struct Blueye_Protocol_LaserCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Laser intensity and modulation.
+  public var laser: Blueye_Protocol_Laser {
+    get {_laser ?? Blueye_Protocol_Laser()}
+    set {_laser = newValue}
+  }
+  /// Returns true if `laser` has been explicitly set.
+  public var hasLaser: Bool {self._laser != nil}
+  /// Clears the value of `laser`. Subsequent reads from it will return its default value.
+  public mutating func clearLaser() {self._laser = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _laser: Blueye_Protocol_Laser? = nil
+}
+
+/// TiltStabilizationCommand enables or disables camera tilt stabilization, as TiltStabilizationCtrl does.
+public nonisolated struct Blueye_Protocol_TiltStabilizationCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The tilt stabilization state to set.
+  public var state: Blueye_Protocol_TiltStabilizationState {
+    get {_state ?? Blueye_Protocol_TiltStabilizationState()}
+    set {_state = newValue}
+  }
+  /// Returns true if `state` has been explicitly set.
+  public var hasState: Bool {self._state != nil}
+  /// Clears the value of `state`. Subsequent reads from it will return its default value.
+  public mutating func clearState() {self._state = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _state: Blueye_Protocol_TiltStabilizationState? = nil
+}
+
+/// CvModelStateCommand starts or stops a computer vision model on the drone, as SetCvModelStateReq does.
+///
+/// The instruction completes when the model reports the requested state.
+public nonisolated struct Blueye_Protocol_CvModelStateCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The model package to start or stop, as listed in CvModelInfo.
+  public var packageID: String = String()
+
+  /// True to start the model, false to stop it.
+  public var running: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// AnnotationCommand records an annotation in the dive log, as AnnotationCtrl does.
+public nonisolated struct Blueye_Protocol_AnnotationCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The annotation to record. The drone sets the timestamp and the source.
+  public var annotation: Blueye_Protocol_Annotation {
+    get {_annotation ?? Blueye_Protocol_Annotation()}
+    set {_annotation = newValue}
+  }
+  /// Returns true if `annotation` has been explicitly set.
+  public var hasAnnotation: Bool {self._annotation != nil}
+  /// Clears the value of `annotation`. Subsequent reads from it will return its default value.
+  public mutating func clearAnnotation() {self._annotation = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _annotation: Blueye_Protocol_Annotation? = nil
+}
+
+/// HeadingCommand turns the drone to a heading and holds it with auto heading. It completes once the
+/// heading has settled.
+public nonisolated struct Blueye_Protocol_HeadingCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Target heading from north (deg, 0..360), or the turn when relative is set (deg, -180..180).
+  public var heading: Float = 0
+
+  /// True to turn by `heading` degrees from the current heading; positive is clockwise.
+  public var relative: Bool = false
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// TransectCommand drives a straight line from the current position, like a waypoint the drone
+/// computes itself from a course and a distance.
+public nonisolated struct Blueye_Protocol_TransectCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Course relative to north (deg, 0..360).
+  public var course: Float = 0
+
+  /// Length of the line (m).
+  public var distance: Float = 0
+
+  /// Desired speed over ground (m/s). The mission default when 0.
+  public var speedToTarget: Float = 0
+
+  /// Optional depth or altitude to hold along the line.
+  public var depthSetPoint: Blueye_Protocol_DepthSetPoint {
+    get {_depthSetPoint ?? Blueye_Protocol_DepthSetPoint()}
+    set {_depthSetPoint = newValue}
+  }
+  /// Returns true if `depthSetPoint` has been explicitly set.
+  public var hasDepthSetPoint: Bool {self._depthSetPoint != nil}
+  /// Clears the value of `depthSetPoint`. Subsequent reads from it will return its default value.
+  public mutating func clearDepthSetPoint() {self._depthSetPoint = nil}
+
+  /// Radius of acceptance at the end of the line (m). The mission default when 0.
+  public var circleOfAcceptance: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _depthSetPoint: Blueye_Protocol_DepthSetPoint? = nil
+}
+
+/// RelativeDepthCommand changes the depth by an amount from where the drone is when it starts.
+public nonisolated struct Blueye_Protocol_RelativeDepthCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Change in depth (m); positive is deeper, negative shallower.
+  public var depthChange: Float = 0
+
+  /// Desired speed to the new depth (m/s). The mission default when 0.
+  public var speedToDepth: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// CruiseSpeedCommand changes the cruise speed used by the following instructions of the mission.
+public nonisolated struct Blueye_Protocol_CruiseSpeedCommand: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Desired surge speed (m/s). Must be greater than zero.
+  public var cruiseSpeed: Float = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -905,7 +2145,9 @@ public nonisolated struct Blueye_Protocol_SurveyCommand: Sendable {
   /// Clears the value of `depthSetPoint`. Subsequent reads from it will return its default value.
   public mutating func clearDepthSetPoint() {self._depthSetPoint = nil}
 
-  /// If true, reverse the scan line order (swap start and end points).
+  /// The planner generated the pattern in reverse, from its last scan line to its first.
+  /// The waypoints are already in that order: the drone flies them as given, and
+  /// the planner reads this back to rebuild the pattern.
   public var reverse: Bool = false
 
   /// Pre-computed waypoints generated by the planner from the polygon and parameters.
@@ -1013,37 +2255,192 @@ public nonisolated struct Blueye_Protocol_ReferenceAutoPilot: Sendable {
 }
 
 /// Mission Status is used for showing the status of the mission.
-public nonisolated struct Blueye_Protocol_MissionStatus: Sendable {
+public nonisolated struct Blueye_Protocol_MissionStatus: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// State of the mission supervisor.
-  public var state: Blueye_Protocol_MissionState = .unspecified
+  public var state: Blueye_Protocol_MissionState {
+    get {_storage._state}
+    set {_uniqueStorage()._state = newValue}
+  }
 
   /// Time elapsed since mission started (s).
-  public var timeElapsed: UInt32 = 0
+  public var timeElapsed: UInt32 {
+    get {_storage._timeElapsed}
+    set {_uniqueStorage()._timeElapsed = newValue}
+  }
 
   /// Estimated time to complete the mission (s).
-  public var estimatedTimeToComplete: UInt32 = 0
+  public var estimatedTimeToComplete: UInt32 {
+    get {_storage._estimatedTimeToComplete}
+    set {_uniqueStorage()._estimatedTimeToComplete = newValue}
+  }
 
   /// Distance left of the mission (m).
-  public var distanceToComplete: UInt32 = 0
+  public var distanceToComplete: UInt32 {
+    get {_storage._distanceToComplete}
+    set {_uniqueStorage()._distanceToComplete = newValue}
+  }
 
-  /// Ids of the completed instructions.
-  public var completedInstructionIds: [UInt32] = []
+  /// Ids of the completed instructions, skipped ones included.
+  public var completedInstructionIds: [UInt32] {
+    get {_storage._completedInstructionIds}
+    set {_uniqueStorage()._completedInstructionIds = newValue}
+  }
 
   /// Total number of instructions in the mission.
-  public var totalNumberOfInstructions: UInt32 = 0
+  public var totalNumberOfInstructions: UInt32 {
+    get {_storage._totalNumberOfInstructions}
+    set {_uniqueStorage()._totalNumberOfInstructions = newValue}
+  }
 
   /// Ids of the completed path segments.
-  public var completedPathSegmentIds: [UInt32] = []
+  public var completedPathSegmentIds: [UInt32] {
+    get {_storage._completedPathSegmentIds}
+    set {_uniqueStorage()._completedPathSegmentIds = newValue}
+  }
 
   /// Total number of path segments in the mission.
-  public var totalNumberOfPathSegments: UInt32 = 0
+  public var totalNumberOfPathSegments: UInt32 {
+    get {_storage._totalNumberOfPathSegments}
+    set {_uniqueStorage()._totalNumberOfPathSegments = newValue}
+  }
 
   /// Mission id of the active mission.
-  public var id: UInt32 = 0
+  public var id: UInt32 {
+    get {_storage._id}
+    set {_uniqueStorage()._id = newValue}
+  }
+
+  /// Id of the instruction that is running, not set when none.
+  public var activeInstructionID: UInt32 {
+    get {_storage._activeInstructionID ?? 0}
+    set {_uniqueStorage()._activeInstructionID = newValue}
+  }
+  /// Returns true if `activeInstructionID` has been explicitly set.
+  public var hasActiveInstructionID: Bool {_storage._activeInstructionID != nil}
+  /// Clears the value of `activeInstructionID`. Subsequent reads from it will return its default value.
+  public mutating func clearActiveInstructionID() {_uniqueStorage()._activeInstructionID = nil}
+
+  /// Revision of the loaded mission, see Mission.revision.
+  public var revision: UInt32 {
+    get {_storage._revision}
+    set {_uniqueStorage()._revision = newValue}
+  }
+
+  /// Why the mission failed to load or start or was aborted by the drone.
+  public var failureReason: String {
+    get {_storage._failureReason}
+    set {_uniqueStorage()._failureReason = newValue}
+  }
+
+  /// Mission.uuid of the loaded mission.
+  public var uuid: String {
+    get {_storage._uuid}
+    set {_uniqueStorage()._uuid = newValue}
+  }
+
+  /// How the last mission run ended. It stays when the mission is cleared or another one is loaded, is
+  /// replaced when a run ends again, including one resumed after an abort, and is lost when the drone restarts.
+  public var lastOutcome: Blueye_Protocol_MissionOutcome {
+    get {_storage._lastOutcome ?? Blueye_Protocol_MissionOutcome()}
+    set {_uniqueStorage()._lastOutcome = newValue}
+  }
+  /// Returns true if `lastOutcome` has been explicitly set.
+  public var hasLastOutcome: Bool {_storage._lastOutcome != nil}
+  /// Clears the value of `lastOutcome`. Subsequent reads from it will return its default value.
+  public mutating func clearLastOutcome() {_uniqueStorage()._lastOutcome = nil}
+
+  /// Mission.load_id of the loaded mission, 0 when none.
+  public var loadID: UInt64 {
+    get {_storage._loadID}
+    set {_uniqueStorage()._loadID = newValue}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// How a mission run ended, kept after the mission is cleared so a client that reconnects can tell.
+public nonisolated struct Blueye_Protocol_MissionOutcome: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// How the run ended.
+  public var result: Blueye_Protocol_MissionResult = .unspecified
+
+  /// Mission.id of the mission.
+  public var missionID: UInt32 = 0
+
+  /// Mission.uuid of the mission.
+  public var missionUuid: String = String()
+
+  /// Mission.revision when the run ended.
+  public var revision: UInt32 = 0
+
+  /// Id of the instruction that was running when it ended, not set when none.
+  public var instructionID: UInt32 {
+    get {_instructionID ?? 0}
+    set {_instructionID = newValue}
+  }
+  /// Returns true if `instructionID` has been explicitly set.
+  public var hasInstructionID: Bool {self._instructionID != nil}
+  /// Clears the value of `instructionID`. Subsequent reads from it will return its default value.
+  public mutating func clearInstructionID() {self._instructionID = nil}
+
+  /// Why the drone aborted the mission.
+  public var abortReason: Blueye_Protocol_MissionAbortReason = .unspecified
+
+  /// Why the drone aborted the mission, as text.
+  public var reason: String = String()
+
+  /// When the run ended, by the drone's clock.
+  public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_endTime = newValue}
+  }
+  /// Returns true if `endTime` has been explicitly set.
+  public var hasEndTime: Bool {self._endTime != nil}
+  /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
+  public mutating func clearEndTime() {self._endTime = nil}
+
+  /// Ids of the instructions the run skipped.
+  public var skippedInstructionIds: [UInt32] = []
+
+  /// Mission.load_id of the mission.
+  public var loadID: UInt64 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _instructionID: UInt32? = nil
+  fileprivate var _endTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
+/// Result of an instruction started with RunInstructionCtrl.
+public nonisolated struct Blueye_Protocol_InstructionResult: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The request_id given to RunInstructionCtrl.
+  public var requestID: UInt32 = 0
+
+  /// Id of the instruction, as given by the client.
+  public var instructionID: UInt32 = 0
+
+  /// Outcome so far.
+  public var state: Blueye_Protocol_InstructionResultState = .unspecified
+
+  /// Why the instruction was rejected, failed or was cancelled (optional).
+  public var reason: String = String()
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1063,7 +2460,15 @@ nonisolated extension Blueye_Protocol_ControlModeVertical: SwiftProtobuf._ProtoN
 }
 
 nonisolated extension Blueye_Protocol_ControlModeHorizontal: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CONTROL_MODE_HORIZONTAL_UNSPECIFIED\0\u{1}CONTROL_MODE_HORIZONTAL_MANUAL\0\u{1}CONTROL_MODE_HORIZONTAL_AUTO_HEADING\0\u{1}CONTROL_MODE_HORIZONTAL_STATION_KEEPING\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0CONTROL_MODE_HORIZONTAL_UNSPECIFIED\0\u{1}CONTROL_MODE_HORIZONTAL_MANUAL\0\u{1}CONTROL_MODE_HORIZONTAL_AUTO_HEADING\0\u{1}CONTROL_MODE_HORIZONTAL_STATION_KEEPING\0\u{1}CONTROL_MODE_HORIZONTAL_WEATHER_VANING\0")
+}
+
+nonisolated extension Blueye_Protocol_TriggerKind: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0TRIGGER_KIND_UNSPECIFIED\0\u{1}TRIGGER_KIND_DETECTION\0\u{1}TRIGGER_KIND_DEPTH\0\u{1}TRIGGER_KIND_ALTITUDE\0\u{1}TRIGGER_KIND_LOCATION\0")
+}
+
+nonisolated extension Blueye_Protocol_LightTarget: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0LIGHT_TARGET_UNSPECIFIED\0\u{1}LIGHT_TARGET_MAIN\0\u{1}LIGHT_TARGET_GUESTPORT\0")
 }
 
 nonisolated extension Blueye_Protocol_CameraAction: SwiftProtobuf._ProtoNameProviding {
@@ -1071,16 +2476,32 @@ nonisolated extension Blueye_Protocol_CameraAction: SwiftProtobuf._ProtoNameProv
 }
 
 nonisolated extension Blueye_Protocol_InstructionType: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0INSTRUCTION_TYPE_UNSPECIFIED\0\u{1}INSTRUCTION_TYPE_NONE\0\u{1}INSTRUCTION_TYPE_GO_TO_WAYPOINT\0\u{1}INSTRUCTION_TYPE_GO_TO_WAYPOINT_WITH_DEPTH_SET_POINT\0\u{1}INSTRUCTION_TYPE_GO_TO_DEPTH_SET_POINT\0\u{1}INSTRUCTION_TYPE_SET_CAMERA_ACTION\0\u{1}INSTRUCTION_TYPE_SET_CONTROL_MODE\0\u{1}INSTRUCTION_TYPE_SET_TILT_MAIN_CAMERA\0\u{1}INSTRUCTION_TYPE_SET_TILT_SERVO\0\u{1}INSTRUCTION_TYPE_WAIT_FOR_SEC\0\u{1}INSTRUCTION_TYPE_GO_TO_SURFACE\0\u{1}INSTRUCTION_TYPE_GO_TO_SEABED\0\u{1}INSTRUCTION_TYPE_GO_TO_HOME\0\u{1}INSTRUCTION_TYPE_SURVEY\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0INSTRUCTION_TYPE_UNSPECIFIED\0\u{1}INSTRUCTION_TYPE_NONE\0\u{1}INSTRUCTION_TYPE_GO_TO_WAYPOINT\0\u{1}INSTRUCTION_TYPE_GO_TO_WAYPOINT_WITH_DEPTH_SET_POINT\0\u{1}INSTRUCTION_TYPE_GO_TO_DEPTH_SET_POINT\0\u{1}INSTRUCTION_TYPE_SET_CAMERA_ACTION\0\u{1}INSTRUCTION_TYPE_SET_CONTROL_MODE\0\u{1}INSTRUCTION_TYPE_SET_TILT_MAIN_CAMERA\0\u{1}INSTRUCTION_TYPE_SET_TILT_SERVO\0\u{1}INSTRUCTION_TYPE_WAIT_FOR_SEC\0\u{1}INSTRUCTION_TYPE_GO_TO_SURFACE\0\u{1}INSTRUCTION_TYPE_GO_TO_SEABED\0\u{1}INSTRUCTION_TYPE_GO_TO_HOME\0\u{1}INSTRUCTION_TYPE_SURVEY\0\u{1}INSTRUCTION_TYPE_RECORD_MULTIBEAM\0\u{1}INSTRUCTION_TYPE_ACTIVATE_MULTIBEAM\0\u{1}INSTRUCTION_TYPE_SET_MULTIBEAM_CONFIG\0\u{1}INSTRUCTION_TYPE_SET_LIGHTS\0\u{1}INSTRUCTION_TYPE_SET_LASER\0\u{1}INSTRUCTION_TYPE_SET_TILT_STABILIZATION\0\u{1}INSTRUCTION_TYPE_SET_CV_MODEL\0\u{1}INSTRUCTION_TYPE_ANNOTATION\0\u{1}INSTRUCTION_TYPE_GO_TO_HEADING\0\u{1}INSTRUCTION_TYPE_TRANSECT\0\u{1}INSTRUCTION_TYPE_GO_TO_RELATIVE_DEPTH\0\u{1}INSTRUCTION_TYPE_SET_CRUISE_SPEED\0")
 }
 
 nonisolated extension Blueye_Protocol_MissionState: SwiftProtobuf._ProtoNameProviding {
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0MISSION_STATE_UNSPECIFIED\0\u{1}MISSION_STATE_INACTIVE\0\u{1}MISSION_STATE_READY\0\u{1}MISSION_STATE_RUNNING\0\u{1}MISSION_STATE_PAUSED\0\u{1}MISSION_STATE_COMPLETED\0\u{1}MISSION_STATE_ABORTED\0\u{1}MISSION_STATE_FAILED_TO_LOAD_MISSION\0\u{1}MISSION_STATE_FAILED_TO_START_MISSION\0")
 }
 
+nonisolated extension Blueye_Protocol_MissionResult: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0MISSION_RESULT_UNSPECIFIED\0\u{1}MISSION_RESULT_COMPLETED\0\u{1}MISSION_RESULT_ABORTED\0\u{1}MISSION_RESULT_CANCELLED\0")
+}
+
+nonisolated extension Blueye_Protocol_MissionAbortReason: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0MISSION_ABORT_REASON_UNSPECIFIED\0\u{1}MISSION_ABORT_REASON_CONTROL_MODE_LOST\0\u{1}MISSION_ABORT_REASON_POSITION_UNKNOWN\0\u{1}MISSION_ABORT_REASON_STUCK\0\u{1}MISSION_ABORT_REASON_WAYPOINT_TOO_FAR\0\u{1}MISSION_ABORT_REASON_HEADING_UNKNOWN\0\u{1}MISSION_ABORT_REASON_HEADING_NOT_REACHED\0\u{1}MISSION_ABORT_REASON_DEVICE_TIMEOUT\0\u{1}MISSION_ABORT_REASON_DURATION_TOO_LONG\0\u{1}MISSION_ABORT_REASON_SUPERVISOR\0")
+}
+
+nonisolated extension Blueye_Protocol_InstructionResultState: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0INSTRUCTION_RESULT_STATE_UNSPECIFIED\0\u{1}INSTRUCTION_RESULT_STATE_ACCEPTED\0\u{1}INSTRUCTION_RESULT_STATE_REJECTED\0\u{1}INSTRUCTION_RESULT_STATE_COMPLETED\0\u{1}INSTRUCTION_RESULT_STATE_FAILED\0\u{1}INSTRUCTION_RESULT_STATE_CANCELLED\0")
+}
+
+nonisolated extension Blueye_Protocol_MissionRuleState: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0MISSION_RULE_STATE_UNSPECIFIED\0\u{1}MISSION_RULE_STATE_IDLE\0\u{1}MISSION_RULE_STATE_ACTIVE\0\u{1}MISSION_RULE_STATE_COOLDOWN\0\u{1}MISSION_RULE_STATE_DISABLED\0")
+}
+
 nonisolated extension Blueye_Protocol_Mission: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Mission"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}instructions\0\u{3}path_segments\0\u{3}total_distance\0\u{3}total_duration_time\0\u{3}default_surge_speed\0\u{3}default_heave_speed\0\u{3}default_circle_of_acceptance\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}instructions\0\u{3}path_segments\0\u{3}total_distance\0\u{3}total_duration_time\0\u{3}default_surge_speed\0\u{3}default_heave_speed\0\u{3}default_circle_of_acceptance\0\u{1}revision\0\u{1}uuid\0\u{3}load_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1097,6 +2518,9 @@ nonisolated extension Blueye_Protocol_Mission: SwiftProtobuf.Message, SwiftProto
       case 7: try { try decoder.decodeSingularFloatField(value: &self.defaultSurgeSpeed) }()
       case 8: try { try decoder.decodeSingularFloatField(value: &self.defaultHeaveSpeed) }()
       case 9: try { try decoder.decodeSingularFloatField(value: &self.defaultCircleOfAcceptance) }()
+      case 10: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
+      case 11: try { try decoder.decodeSingularStringField(value: &self.uuid) }()
+      case 12: try { try decoder.decodeSingularUInt64Field(value: &self.loadID) }()
       default: break
       }
     }
@@ -1130,6 +2554,15 @@ nonisolated extension Blueye_Protocol_Mission: SwiftProtobuf.Message, SwiftProto
     if self.defaultCircleOfAcceptance.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.defaultCircleOfAcceptance, fieldNumber: 9)
     }
+    if self.revision != 0 {
+      try visitor.visitSingularUInt32Field(value: self.revision, fieldNumber: 10)
+    }
+    if !self.uuid.isEmpty {
+      try visitor.visitSingularStringField(value: self.uuid, fieldNumber: 11)
+    }
+    if self.loadID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.loadID, fieldNumber: 12)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1143,6 +2576,9 @@ nonisolated extension Blueye_Protocol_Mission: SwiftProtobuf.Message, SwiftProto
     if lhs.defaultSurgeSpeed != rhs.defaultSurgeSpeed {return false}
     if lhs.defaultHeaveSpeed != rhs.defaultHeaveSpeed {return false}
     if lhs.defaultCircleOfAcceptance != rhs.defaultCircleOfAcceptance {return false}
+    if lhs.revision != rhs.revision {return false}
+    if lhs.uuid != rhs.uuid {return false}
+    if lhs.loadID != rhs.loadID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1150,7 +2586,7 @@ nonisolated extension Blueye_Protocol_Mission: SwiftProtobuf.Message, SwiftProto
 
 nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Instruction"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}group_id\0\u{3}auto_continue\0\u{3}waypoint_command\0\u{3}depth_set_point_command\0\u{3}camera_command\0\u{3}control_mode_command\0\u{3}tilt_main_camera_command\0\u{3}tilt_multibeam_command\0\u{3}wait_for_command\0\u{3}go_to_surface_command\0\u{3}go_to_seabed_command\0\u{3}go_to_home_command\0\u{3}survey_command\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{3}group_id\0\u{4}\u{2}waypoint_command\0\u{3}depth_set_point_command\0\u{3}camera_command\0\u{3}control_mode_command\0\u{3}tilt_main_camera_command\0\u{3}tilt_multibeam_command\0\u{3}wait_for_command\0\u{3}go_to_surface_command\0\u{3}go_to_seabed_command\0\u{3}go_to_home_command\0\u{3}survey_command\0\u{3}record_multibeam_command\0\u{3}activate_multibeam_command\0\u{3}multibeam_config_command\0\u{3}lights_command\0\u{3}laser_command\0\u{3}tilt_stabilization_command\0\u{3}cv_model_state_command\0\u{3}annotation_command\0\u{3}heading_command\0\u{3}transect_command\0\u{3}relative_depth_command\0\u{3}cruise_speed_command\0\u{3}pause_on_completion\0\u{b}auto_continue\0\u{c}\u{3}\u{1}")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1160,7 +2596,6 @@ nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftP
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularUInt32Field(value: &self.id) }()
       case 2: try { try decoder.decodeSingularUInt32Field(value: &self.groupID) }()
-      case 3: try { try decoder.decodeSingularBoolField(value: &self.autoContinue) }()
       case 4: try {
         var v: Blueye_Protocol_WaypointCommand?
         var hadOneofValue = false
@@ -1304,6 +2739,163 @@ nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftP
           self.command = .surveyCommand(v)
         }
       }()
+      case 15: try {
+        var v: Blueye_Protocol_RecordMultibeamCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .recordMultibeamCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .recordMultibeamCommand(v)
+        }
+      }()
+      case 16: try {
+        var v: Blueye_Protocol_ActivateMultibeamCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .activateMultibeamCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .activateMultibeamCommand(v)
+        }
+      }()
+      case 17: try {
+        var v: Blueye_Protocol_MultibeamConfigCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .multibeamConfigCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .multibeamConfigCommand(v)
+        }
+      }()
+      case 18: try {
+        var v: Blueye_Protocol_LightsCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .lightsCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .lightsCommand(v)
+        }
+      }()
+      case 19: try {
+        var v: Blueye_Protocol_LaserCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .laserCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .laserCommand(v)
+        }
+      }()
+      case 20: try {
+        var v: Blueye_Protocol_TiltStabilizationCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .tiltStabilizationCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .tiltStabilizationCommand(v)
+        }
+      }()
+      case 21: try {
+        var v: Blueye_Protocol_CvModelStateCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .cvModelStateCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .cvModelStateCommand(v)
+        }
+      }()
+      case 22: try {
+        var v: Blueye_Protocol_AnnotationCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .annotationCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .annotationCommand(v)
+        }
+      }()
+      case 23: try {
+        var v: Blueye_Protocol_HeadingCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .headingCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .headingCommand(v)
+        }
+      }()
+      case 24: try {
+        var v: Blueye_Protocol_TransectCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .transectCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .transectCommand(v)
+        }
+      }()
+      case 25: try {
+        var v: Blueye_Protocol_RelativeDepthCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .relativeDepthCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .relativeDepthCommand(v)
+        }
+      }()
+      case 26: try {
+        var v: Blueye_Protocol_CruiseSpeedCommand?
+        var hadOneofValue = false
+        if let current = self.command {
+          hadOneofValue = true
+          if case .cruiseSpeedCommand(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.command = .cruiseSpeedCommand(v)
+        }
+      }()
+      case 27: try { try decoder.decodeSingularBoolField(value: &self.pauseOnCompletion) }()
       default: break
       }
     }
@@ -1319,9 +2911,6 @@ nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftP
     }
     if self.groupID != 0 {
       try visitor.visitSingularUInt32Field(value: self.groupID, fieldNumber: 2)
-    }
-    if self.autoContinue != false {
-      try visitor.visitSingularBoolField(value: self.autoContinue, fieldNumber: 3)
     }
     switch self.command {
     case .waypointCommand?: try {
@@ -1368,7 +2957,58 @@ nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftP
       guard case .surveyCommand(let v)? = self.command else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
     }()
+    case .recordMultibeamCommand?: try {
+      guard case .recordMultibeamCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 15)
+    }()
+    case .activateMultibeamCommand?: try {
+      guard case .activateMultibeamCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 16)
+    }()
+    case .multibeamConfigCommand?: try {
+      guard case .multibeamConfigCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 17)
+    }()
+    case .lightsCommand?: try {
+      guard case .lightsCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 18)
+    }()
+    case .laserCommand?: try {
+      guard case .laserCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 19)
+    }()
+    case .tiltStabilizationCommand?: try {
+      guard case .tiltStabilizationCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
+    }()
+    case .cvModelStateCommand?: try {
+      guard case .cvModelStateCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 21)
+    }()
+    case .annotationCommand?: try {
+      guard case .annotationCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
+    }()
+    case .headingCommand?: try {
+      guard case .headingCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 23)
+    }()
+    case .transectCommand?: try {
+      guard case .transectCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 24)
+    }()
+    case .relativeDepthCommand?: try {
+      guard case .relativeDepthCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 25)
+    }()
+    case .cruiseSpeedCommand?: try {
+      guard case .cruiseSpeedCommand(let v)? = self.command else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 26)
+    }()
     case nil: break
+    }
+    if self.pauseOnCompletion != false {
+      try visitor.visitSingularBoolField(value: self.pauseOnCompletion, fieldNumber: 27)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1376,7 +3016,7 @@ nonisolated extension Blueye_Protocol_Instruction: SwiftProtobuf.Message, SwiftP
   public static func ==(lhs: Blueye_Protocol_Instruction, rhs: Blueye_Protocol_Instruction) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.groupID != rhs.groupID {return false}
-    if lhs.autoContinue != rhs.autoContinue {return false}
+    if lhs.pauseOnCompletion != rhs.pauseOnCompletion {return false}
     if lhs.command != rhs.command {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1512,6 +3152,544 @@ nonisolated extension Blueye_Protocol_ControlModeCommand: SwiftProtobuf.Message,
   public static func ==(lhs: Blueye_Protocol_ControlModeCommand, rhs: Blueye_Protocol_ControlModeCommand) -> Bool {
     if lhs.controlModeVertical != rhs.controlModeVertical {return false}
     if lhs.controlModeHorizontal != rhs.controlModeHorizontal {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_DetectionTrigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".DetectionTrigger"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}class_names\0\u{3}model_name\0\u{1}camera\0\u{3}min_confidence\0\u{3}min_area_fraction\0\u{b}hold_ms\0\u{b}release_ms\0\u{b}cooldown_ms\0\u{c}\u{6}\u{1}\u{c}\u{7}\u{1}\u{c}\u{8}\u{1}")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedStringField(value: &self.classNames) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.modelName) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.camera) }()
+      case 4: try { try decoder.decodeSingularFloatField(value: &self.minConfidence) }()
+      case 5: try { try decoder.decodeSingularFloatField(value: &self.minAreaFraction) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.classNames.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.classNames, fieldNumber: 1)
+    }
+    if !self.modelName.isEmpty {
+      try visitor.visitSingularStringField(value: self.modelName, fieldNumber: 2)
+    }
+    if self.camera != .unspecified {
+      try visitor.visitSingularEnumField(value: self.camera, fieldNumber: 3)
+    }
+    if self.minConfidence.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.minConfidence, fieldNumber: 4)
+    }
+    if self.minAreaFraction.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.minAreaFraction, fieldNumber: 5)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_DetectionTrigger, rhs: Blueye_Protocol_DetectionTrigger) -> Bool {
+    if lhs.classNames != rhs.classNames {return false}
+    if lhs.modelName != rhs.modelName {return false}
+    if lhs.camera != rhs.camera {return false}
+    if lhs.minConfidence != rhs.minConfidence {return false}
+    if lhs.minAreaFraction != rhs.minAreaFraction {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_DepthTrigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".DepthTrigger"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}min_depth\0\u{3}max_depth\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.minDepth) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.maxDepth) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.minDepth.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.minDepth, fieldNumber: 1)
+    }
+    if self.maxDepth.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.maxDepth, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_DepthTrigger, rhs: Blueye_Protocol_DepthTrigger) -> Bool {
+    if lhs.minDepth != rhs.minDepth {return false}
+    if lhs.maxDepth != rhs.maxDepth {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_AltitudeTrigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AltitudeTrigger"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}min_altitude\0\u{3}max_altitude\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.minAltitude) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.maxAltitude) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.minAltitude.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.minAltitude, fieldNumber: 1)
+    }
+    if self.maxAltitude.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.maxAltitude, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_AltitudeTrigger, rhs: Blueye_Protocol_AltitudeTrigger) -> Bool {
+    if lhs.minAltitude != rhs.minAltitude {return false}
+    if lhs.maxAltitude != rhs.maxAltitude {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_LocationTrigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".LocationTrigger"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}position\0\u{3}circle_of_acceptance\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._position) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.circleOfAcceptance) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._position {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.circleOfAcceptance.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.circleOfAcceptance, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_LocationTrigger, rhs: Blueye_Protocol_LocationTrigger) -> Bool {
+    if lhs._position != rhs._position {return false}
+    if lhs.circleOfAcceptance != rhs.circleOfAcceptance {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_Trigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".Trigger"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}detection_trigger\0\u{3}depth_trigger\0\u{3}altitude_trigger\0\u{3}location_trigger\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Blueye_Protocol_DetectionTrigger?
+        var hadOneofValue = false
+        if let current = self.condition {
+          hadOneofValue = true
+          if case .detectionTrigger(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.condition = .detectionTrigger(v)
+        }
+      }()
+      case 2: try {
+        var v: Blueye_Protocol_DepthTrigger?
+        var hadOneofValue = false
+        if let current = self.condition {
+          hadOneofValue = true
+          if case .depthTrigger(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.condition = .depthTrigger(v)
+        }
+      }()
+      case 3: try {
+        var v: Blueye_Protocol_AltitudeTrigger?
+        var hadOneofValue = false
+        if let current = self.condition {
+          hadOneofValue = true
+          if case .altitudeTrigger(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.condition = .altitudeTrigger(v)
+        }
+      }()
+      case 4: try {
+        var v: Blueye_Protocol_LocationTrigger?
+        var hadOneofValue = false
+        if let current = self.condition {
+          hadOneofValue = true
+          if case .locationTrigger(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.condition = .locationTrigger(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.condition {
+    case .detectionTrigger?: try {
+      guard case .detectionTrigger(let v)? = self.condition else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .depthTrigger?: try {
+      guard case .depthTrigger(let v)? = self.condition else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .altitudeTrigger?: try {
+      guard case .altitudeTrigger(let v)? = self.condition else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .locationTrigger?: try {
+      guard case .locationTrigger(let v)? = self.condition else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_Trigger, rhs: Blueye_Protocol_Trigger) -> Bool {
+    if lhs.condition != rhs.condition {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_MissionRule: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MissionRule"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}disabled\0\u{4}\u{2}enter_instructions\0\u{3}exit_instructions\0\u{1}triggers\0\u{3}hold_duration\0\u{3}release_duration\0\u{3}cooldown_duration\0\u{b}detection_trigger\0\u{c}\u{4}\u{1}")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.id) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
+      case 5: try { try decoder.decodeRepeatedMessageField(value: &self.enterInstructions) }()
+      case 6: try { try decoder.decodeRepeatedMessageField(value: &self.exitInstructions) }()
+      case 7: try { try decoder.decodeRepeatedMessageField(value: &self.triggers) }()
+      case 8: try { try decoder.decodeSingularMessageField(value: &self._holdDuration) }()
+      case 9: try { try decoder.decodeSingularMessageField(value: &self._releaseDuration) }()
+      case 10: try { try decoder.decodeSingularMessageField(value: &self._cooldownDuration) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.id != 0 {
+      try visitor.visitSingularUInt32Field(value: self.id, fieldNumber: 1)
+    }
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 2)
+    }
+    if self.disabled != false {
+      try visitor.visitSingularBoolField(value: self.disabled, fieldNumber: 3)
+    }
+    if !self.enterInstructions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.enterInstructions, fieldNumber: 5)
+    }
+    if !self.exitInstructions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.exitInstructions, fieldNumber: 6)
+    }
+    if !self.triggers.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.triggers, fieldNumber: 7)
+    }
+    try { if let v = self._holdDuration {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+    } }()
+    try { if let v = self._releaseDuration {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+    } }()
+    try { if let v = self._cooldownDuration {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_MissionRule, rhs: Blueye_Protocol_MissionRule) -> Bool {
+    if lhs.id != rhs.id {return false}
+    if lhs.name != rhs.name {return false}
+    if lhs.disabled != rhs.disabled {return false}
+    if lhs.enterInstructions != rhs.enterInstructions {return false}
+    if lhs.exitInstructions != rhs.exitInstructions {return false}
+    if lhs.triggers != rhs.triggers {return false}
+    if lhs._holdDuration != rhs._holdDuration {return false}
+    if lhs._releaseDuration != rhs._releaseDuration {return false}
+    if lhs._cooldownDuration != rhs._cooldownDuration {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_MissionRuleStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MissionRuleStatus"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}state\0\u{1}episodes\0\u{3}last_fired\0\u{3}last_result\0\u{3}last_reason\0\u{1}triggers\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.id) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.state) }()
+      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.episodes) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._lastFired) }()
+      case 5: try { try decoder.decodeSingularEnumField(value: &self.lastResult) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.lastReason) }()
+      case 7: try { try decoder.decodeRepeatedMessageField(value: &self.triggers) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.id != 0 {
+      try visitor.visitSingularUInt32Field(value: self.id, fieldNumber: 1)
+    }
+    if self.state != .unspecified {
+      try visitor.visitSingularEnumField(value: self.state, fieldNumber: 2)
+    }
+    if self.episodes != 0 {
+      try visitor.visitSingularUInt32Field(value: self.episodes, fieldNumber: 3)
+    }
+    try { if let v = self._lastFired {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
+    if self.lastResult != .unspecified {
+      try visitor.visitSingularEnumField(value: self.lastResult, fieldNumber: 5)
+    }
+    if !self.lastReason.isEmpty {
+      try visitor.visitSingularStringField(value: self.lastReason, fieldNumber: 6)
+    }
+    if !self.triggers.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.triggers, fieldNumber: 7)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_MissionRuleStatus, rhs: Blueye_Protocol_MissionRuleStatus) -> Bool {
+    if lhs.id != rhs.id {return false}
+    if lhs.state != rhs.state {return false}
+    if lhs.episodes != rhs.episodes {return false}
+    if lhs._lastFired != rhs._lastFired {return false}
+    if lhs.lastResult != rhs.lastResult {return false}
+    if lhs.lastReason != rhs.lastReason {return false}
+    if lhs.triggers != rhs.triggers {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_TriggerStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TriggerStatus"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}kind\0\u{1}satisfied\0\u{3}sensor_unavailable\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.kind) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.satisfied) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.sensorUnavailable) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.kind != .unspecified {
+      try visitor.visitSingularEnumField(value: self.kind, fieldNumber: 1)
+    }
+    if self.satisfied != false {
+      try visitor.visitSingularBoolField(value: self.satisfied, fieldNumber: 2)
+    }
+    if self.sensorUnavailable != false {
+      try visitor.visitSingularBoolField(value: self.sensorUnavailable, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_TriggerStatus, rhs: Blueye_Protocol_TriggerStatus) -> Bool {
+    if lhs.kind != rhs.kind {return false}
+    if lhs.satisfied != rhs.satisfied {return false}
+    if lhs.sensorUnavailable != rhs.sensorUnavailable {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_InsertInstruction: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".InsertInstruction"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}instruction\0\u{3}before_id\0\u{1}append\0")
+
+  fileprivate class _StorageClass {
+    var _instruction: Blueye_Protocol_Instruction? = nil
+    var _placement: Blueye_Protocol_InsertInstruction.OneOf_Placement?
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _instruction = source._instruction
+      _placement = source._placement
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._instruction) }()
+        case 2: try {
+          var v: UInt32?
+          try decoder.decodeSingularUInt32Field(value: &v)
+          if let v = v {
+            if _storage._placement != nil {try decoder.handleConflictingOneOf()}
+            _storage._placement = .beforeID(v)
+          }
+        }()
+        case 3: try {
+          var v: Bool?
+          try decoder.decodeSingularBoolField(value: &v)
+          if let v = v {
+            if _storage._placement != nil {try decoder.handleConflictingOneOf()}
+            _storage._placement = .append(v)
+          }
+        }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._instruction {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      switch _storage._placement {
+      case .beforeID?: try {
+        guard case .beforeID(let v)? = _storage._placement else { preconditionFailure() }
+        try visitor.visitSingularUInt32Field(value: v, fieldNumber: 2)
+      }()
+      case .append?: try {
+        guard case .append(let v)? = _storage._placement else { preconditionFailure() }
+        try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
+      }()
+      case nil: break
+      }
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_InsertInstruction, rhs: Blueye_Protocol_InsertInstruction) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._instruction != rhs_storage._instruction {return false}
+        if _storage._placement != rhs_storage._placement {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1685,7 +3863,7 @@ nonisolated extension Blueye_Protocol_WaitForCommand: SwiftProtobuf.Message, Swi
 
 nonisolated extension Blueye_Protocol_CameraCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".CameraCommand"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}camera_action\0\u{3}action_param\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}camera_action\0\u{3}action_param\0\u{1}camera\0\u{3}storage_location\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1695,6 +3873,8 @@ nonisolated extension Blueye_Protocol_CameraCommand: SwiftProtobuf.Message, Swif
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularEnumField(value: &self.cameraAction) }()
       case 2: try { try decoder.decodeSingularFloatField(value: &self.actionParam) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.camera) }()
+      case 4: try { try decoder.decodeSingularEnumField(value: &self.storageLocation) }()
       default: break
       }
     }
@@ -1707,12 +3887,20 @@ nonisolated extension Blueye_Protocol_CameraCommand: SwiftProtobuf.Message, Swif
     if self.actionParam.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.actionParam, fieldNumber: 2)
     }
+    if self.camera != .unspecified {
+      try visitor.visitSingularEnumField(value: self.camera, fieldNumber: 3)
+    }
+    if self.storageLocation != .unspecified {
+      try visitor.visitSingularEnumField(value: self.storageLocation, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Blueye_Protocol_CameraCommand, rhs: Blueye_Protocol_CameraCommand) -> Bool {
     if lhs.cameraAction != rhs.cameraAction {return false}
     if lhs.actionParam != rhs.actionParam {return false}
+    if lhs.camera != rhs.camera {return false}
+    if lhs.storageLocation != rhs.storageLocation {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1803,6 +3991,454 @@ nonisolated extension Blueye_Protocol_GoToHomeCommand: SwiftProtobuf.Message, Sw
 
   public static func ==(lhs: Blueye_Protocol_GoToHomeCommand, rhs: Blueye_Protocol_GoToHomeCommand) -> Bool {
     if lhs.desiredSpeed != rhs.desiredSpeed {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_RecordMultibeamCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RecordMultibeamCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}enable\0\u{3}storage_location\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.enable) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.storageLocation) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.enable != false {
+      try visitor.visitSingularBoolField(value: self.enable, fieldNumber: 1)
+    }
+    if self.storageLocation != .unspecified {
+      try visitor.visitSingularEnumField(value: self.storageLocation, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_RecordMultibeamCommand, rhs: Blueye_Protocol_RecordMultibeamCommand) -> Bool {
+    if lhs.enable != rhs.enable {return false}
+    if lhs.storageLocation != rhs.storageLocation {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_ActivateMultibeamCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".ActivateMultibeamCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}activate\0\u{1}config\0\u{3}expected_device_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.activate) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._config) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.expectedDeviceID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.activate != false {
+      try visitor.visitSingularBoolField(value: self.activate, fieldNumber: 1)
+    }
+    try { if let v = self._config {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.expectedDeviceID != .unspecified {
+      try visitor.visitSingularEnumField(value: self.expectedDeviceID, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_ActivateMultibeamCommand, rhs: Blueye_Protocol_ActivateMultibeamCommand) -> Bool {
+    if lhs.activate != rhs.activate {return false}
+    if lhs._config != rhs._config {return false}
+    if lhs.expectedDeviceID != rhs.expectedDeviceID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_MultibeamConfigCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MultibeamConfigCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}config\0\u{3}expected_device_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._config) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.expectedDeviceID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._config {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.expectedDeviceID != .unspecified {
+      try visitor.visitSingularEnumField(value: self.expectedDeviceID, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_MultibeamConfigCommand, rhs: Blueye_Protocol_MultibeamConfigCommand) -> Bool {
+    if lhs._config != rhs._config {return false}
+    if lhs.expectedDeviceID != rhs.expectedDeviceID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_LightsCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".LightsCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}lights\0\u{1}target\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._lights) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.target) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._lights {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if self.target != .unspecified {
+      try visitor.visitSingularEnumField(value: self.target, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_LightsCommand, rhs: Blueye_Protocol_LightsCommand) -> Bool {
+    if lhs._lights != rhs._lights {return false}
+    if lhs.target != rhs.target {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_LaserCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".LaserCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}laser\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._laser) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._laser {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_LaserCommand, rhs: Blueye_Protocol_LaserCommand) -> Bool {
+    if lhs._laser != rhs._laser {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_TiltStabilizationCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TiltStabilizationCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._state) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._state {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_TiltStabilizationCommand, rhs: Blueye_Protocol_TiltStabilizationCommand) -> Bool {
+    if lhs._state != rhs._state {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_CvModelStateCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".CvModelStateCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}package_id\0\u{1}running\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.packageID) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.running) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.packageID.isEmpty {
+      try visitor.visitSingularStringField(value: self.packageID, fieldNumber: 1)
+    }
+    if self.running != false {
+      try visitor.visitSingularBoolField(value: self.running, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_CvModelStateCommand, rhs: Blueye_Protocol_CvModelStateCommand) -> Bool {
+    if lhs.packageID != rhs.packageID {return false}
+    if lhs.running != rhs.running {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_AnnotationCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".AnnotationCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}annotation\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._annotation) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._annotation {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_AnnotationCommand, rhs: Blueye_Protocol_AnnotationCommand) -> Bool {
+    if lhs._annotation != rhs._annotation {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_HeadingCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".HeadingCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}heading\0\u{1}relative\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.heading) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.relative) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.heading.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.heading, fieldNumber: 1)
+    }
+    if self.relative != false {
+      try visitor.visitSingularBoolField(value: self.relative, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_HeadingCommand, rhs: Blueye_Protocol_HeadingCommand) -> Bool {
+    if lhs.heading != rhs.heading {return false}
+    if lhs.relative != rhs.relative {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_TransectCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".TransectCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}course\0\u{1}distance\0\u{3}speed_to_target\0\u{3}depth_set_point\0\u{3}circle_of_acceptance\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.course) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.distance) }()
+      case 3: try { try decoder.decodeSingularFloatField(value: &self.speedToTarget) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._depthSetPoint) }()
+      case 5: try { try decoder.decodeSingularFloatField(value: &self.circleOfAcceptance) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.course.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.course, fieldNumber: 1)
+    }
+    if self.distance.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.distance, fieldNumber: 2)
+    }
+    if self.speedToTarget.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.speedToTarget, fieldNumber: 3)
+    }
+    try { if let v = self._depthSetPoint {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
+    if self.circleOfAcceptance.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.circleOfAcceptance, fieldNumber: 5)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_TransectCommand, rhs: Blueye_Protocol_TransectCommand) -> Bool {
+    if lhs.course != rhs.course {return false}
+    if lhs.distance != rhs.distance {return false}
+    if lhs.speedToTarget != rhs.speedToTarget {return false}
+    if lhs._depthSetPoint != rhs._depthSetPoint {return false}
+    if lhs.circleOfAcceptance != rhs.circleOfAcceptance {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_RelativeDepthCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".RelativeDepthCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}depth_change\0\u{3}speed_to_depth\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.depthChange) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.speedToDepth) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.depthChange.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.depthChange, fieldNumber: 1)
+    }
+    if self.speedToDepth.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.speedToDepth, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_RelativeDepthCommand, rhs: Blueye_Protocol_RelativeDepthCommand) -> Bool {
+    if lhs.depthChange != rhs.depthChange {return false}
+    if lhs.speedToDepth != rhs.speedToDepth {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_CruiseSpeedCommand: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".CruiseSpeedCommand"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}cruise_speed\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularFloatField(value: &self.cruiseSpeed) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.cruiseSpeed.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.cruiseSpeed, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_CruiseSpeedCommand, rhs: Blueye_Protocol_CruiseSpeedCommand) -> Bool {
+    if lhs.cruiseSpeed != rhs.cruiseSpeed {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2049,7 +4685,175 @@ nonisolated extension Blueye_Protocol_ReferenceAutoPilot: SwiftProtobuf.Message,
 
 nonisolated extension Blueye_Protocol_MissionStatus: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".MissionStatus"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0\u{3}time_elapsed\0\u{3}estimated_time_to_complete\0\u{3}distance_to_complete\0\u{3}completed_instruction_ids\0\u{3}total_number_of_instructions\0\u{3}completed_path_segment_ids\0\u{3}total_number_of_path_segments\0\u{1}id\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}state\0\u{3}time_elapsed\0\u{3}estimated_time_to_complete\0\u{3}distance_to_complete\0\u{3}completed_instruction_ids\0\u{3}total_number_of_instructions\0\u{3}completed_path_segment_ids\0\u{3}total_number_of_path_segments\0\u{1}id\0\u{3}active_instruction_id\0\u{1}revision\0\u{3}failure_reason\0\u{1}uuid\0\u{3}last_outcome\0\u{3}load_id\0")
+
+  fileprivate class _StorageClass {
+    var _state: Blueye_Protocol_MissionState = .unspecified
+    var _timeElapsed: UInt32 = 0
+    var _estimatedTimeToComplete: UInt32 = 0
+    var _distanceToComplete: UInt32 = 0
+    var _completedInstructionIds: [UInt32] = []
+    var _totalNumberOfInstructions: UInt32 = 0
+    var _completedPathSegmentIds: [UInt32] = []
+    var _totalNumberOfPathSegments: UInt32 = 0
+    var _id: UInt32 = 0
+    var _activeInstructionID: UInt32? = nil
+    var _revision: UInt32 = 0
+    var _failureReason: String = String()
+    var _uuid: String = String()
+    var _lastOutcome: Blueye_Protocol_MissionOutcome? = nil
+    var _loadID: UInt64 = 0
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _state = source._state
+      _timeElapsed = source._timeElapsed
+      _estimatedTimeToComplete = source._estimatedTimeToComplete
+      _distanceToComplete = source._distanceToComplete
+      _completedInstructionIds = source._completedInstructionIds
+      _totalNumberOfInstructions = source._totalNumberOfInstructions
+      _completedPathSegmentIds = source._completedPathSegmentIds
+      _totalNumberOfPathSegments = source._totalNumberOfPathSegments
+      _id = source._id
+      _activeInstructionID = source._activeInstructionID
+      _revision = source._revision
+      _failureReason = source._failureReason
+      _uuid = source._uuid
+      _lastOutcome = source._lastOutcome
+      _loadID = source._loadID
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularEnumField(value: &_storage._state) }()
+        case 2: try { try decoder.decodeSingularUInt32Field(value: &_storage._timeElapsed) }()
+        case 3: try { try decoder.decodeSingularUInt32Field(value: &_storage._estimatedTimeToComplete) }()
+        case 4: try { try decoder.decodeSingularUInt32Field(value: &_storage._distanceToComplete) }()
+        case 5: try { try decoder.decodeRepeatedUInt32Field(value: &_storage._completedInstructionIds) }()
+        case 6: try { try decoder.decodeSingularUInt32Field(value: &_storage._totalNumberOfInstructions) }()
+        case 7: try { try decoder.decodeRepeatedUInt32Field(value: &_storage._completedPathSegmentIds) }()
+        case 8: try { try decoder.decodeSingularUInt32Field(value: &_storage._totalNumberOfPathSegments) }()
+        case 9: try { try decoder.decodeSingularUInt32Field(value: &_storage._id) }()
+        case 10: try { try decoder.decodeSingularUInt32Field(value: &_storage._activeInstructionID) }()
+        case 11: try { try decoder.decodeSingularUInt32Field(value: &_storage._revision) }()
+        case 12: try { try decoder.decodeSingularStringField(value: &_storage._failureReason) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._uuid) }()
+        case 14: try { try decoder.decodeSingularMessageField(value: &_storage._lastOutcome) }()
+        case 15: try { try decoder.decodeSingularUInt64Field(value: &_storage._loadID) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if _storage._state != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._state, fieldNumber: 1)
+      }
+      if _storage._timeElapsed != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._timeElapsed, fieldNumber: 2)
+      }
+      if _storage._estimatedTimeToComplete != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._estimatedTimeToComplete, fieldNumber: 3)
+      }
+      if _storage._distanceToComplete != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._distanceToComplete, fieldNumber: 4)
+      }
+      if !_storage._completedInstructionIds.isEmpty {
+        try visitor.visitPackedUInt32Field(value: _storage._completedInstructionIds, fieldNumber: 5)
+      }
+      if _storage._totalNumberOfInstructions != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._totalNumberOfInstructions, fieldNumber: 6)
+      }
+      if !_storage._completedPathSegmentIds.isEmpty {
+        try visitor.visitPackedUInt32Field(value: _storage._completedPathSegmentIds, fieldNumber: 7)
+      }
+      if _storage._totalNumberOfPathSegments != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._totalNumberOfPathSegments, fieldNumber: 8)
+      }
+      if _storage._id != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._id, fieldNumber: 9)
+      }
+      try { if let v = _storage._activeInstructionID {
+        try visitor.visitSingularUInt32Field(value: v, fieldNumber: 10)
+      } }()
+      if _storage._revision != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._revision, fieldNumber: 11)
+      }
+      if !_storage._failureReason.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._failureReason, fieldNumber: 12)
+      }
+      if !_storage._uuid.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._uuid, fieldNumber: 13)
+      }
+      try { if let v = _storage._lastOutcome {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
+      } }()
+      if _storage._loadID != 0 {
+        try visitor.visitSingularUInt64Field(value: _storage._loadID, fieldNumber: 15)
+      }
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_MissionStatus, rhs: Blueye_Protocol_MissionStatus) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._state != rhs_storage._state {return false}
+        if _storage._timeElapsed != rhs_storage._timeElapsed {return false}
+        if _storage._estimatedTimeToComplete != rhs_storage._estimatedTimeToComplete {return false}
+        if _storage._distanceToComplete != rhs_storage._distanceToComplete {return false}
+        if _storage._completedInstructionIds != rhs_storage._completedInstructionIds {return false}
+        if _storage._totalNumberOfInstructions != rhs_storage._totalNumberOfInstructions {return false}
+        if _storage._completedPathSegmentIds != rhs_storage._completedPathSegmentIds {return false}
+        if _storage._totalNumberOfPathSegments != rhs_storage._totalNumberOfPathSegments {return false}
+        if _storage._id != rhs_storage._id {return false}
+        if _storage._activeInstructionID != rhs_storage._activeInstructionID {return false}
+        if _storage._revision != rhs_storage._revision {return false}
+        if _storage._failureReason != rhs_storage._failureReason {return false}
+        if _storage._uuid != rhs_storage._uuid {return false}
+        if _storage._lastOutcome != rhs_storage._lastOutcome {return false}
+        if _storage._loadID != rhs_storage._loadID {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_MissionOutcome: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MissionOutcome"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}result\0\u{3}mission_id\0\u{3}mission_uuid\0\u{1}revision\0\u{3}instruction_id\0\u{3}abort_reason\0\u{1}reason\0\u{3}end_time\0\u{3}skipped_instruction_ids\0\u{3}load_id\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2057,61 +4861,115 @@ nonisolated extension Blueye_Protocol_MissionStatus: SwiftProtobuf.Message, Swif
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularEnumField(value: &self.state) }()
-      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.timeElapsed) }()
-      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.estimatedTimeToComplete) }()
-      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.distanceToComplete) }()
-      case 5: try { try decoder.decodeRepeatedUInt32Field(value: &self.completedInstructionIds) }()
-      case 6: try { try decoder.decodeSingularUInt32Field(value: &self.totalNumberOfInstructions) }()
-      case 7: try { try decoder.decodeRepeatedUInt32Field(value: &self.completedPathSegmentIds) }()
-      case 8: try { try decoder.decodeSingularUInt32Field(value: &self.totalNumberOfPathSegments) }()
-      case 9: try { try decoder.decodeSingularUInt32Field(value: &self.id) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.result) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.missionID) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.missionUuid) }()
+      case 4: try { try decoder.decodeSingularUInt32Field(value: &self.revision) }()
+      case 5: try { try decoder.decodeSingularUInt32Field(value: &self._instructionID) }()
+      case 6: try { try decoder.decodeSingularEnumField(value: &self.abortReason) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.reason) }()
+      case 8: try { try decoder.decodeSingularMessageField(value: &self._endTime) }()
+      case 9: try { try decoder.decodeRepeatedUInt32Field(value: &self.skippedInstructionIds) }()
+      case 10: try { try decoder.decodeSingularUInt64Field(value: &self.loadID) }()
       default: break
       }
     }
   }
 
   public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.state != .unspecified {
-      try visitor.visitSingularEnumField(value: self.state, fieldNumber: 1)
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.result != .unspecified {
+      try visitor.visitSingularEnumField(value: self.result, fieldNumber: 1)
     }
-    if self.timeElapsed != 0 {
-      try visitor.visitSingularUInt32Field(value: self.timeElapsed, fieldNumber: 2)
+    if self.missionID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.missionID, fieldNumber: 2)
     }
-    if self.estimatedTimeToComplete != 0 {
-      try visitor.visitSingularUInt32Field(value: self.estimatedTimeToComplete, fieldNumber: 3)
+    if !self.missionUuid.isEmpty {
+      try visitor.visitSingularStringField(value: self.missionUuid, fieldNumber: 3)
     }
-    if self.distanceToComplete != 0 {
-      try visitor.visitSingularUInt32Field(value: self.distanceToComplete, fieldNumber: 4)
+    if self.revision != 0 {
+      try visitor.visitSingularUInt32Field(value: self.revision, fieldNumber: 4)
     }
-    if !self.completedInstructionIds.isEmpty {
-      try visitor.visitPackedUInt32Field(value: self.completedInstructionIds, fieldNumber: 5)
+    try { if let v = self._instructionID {
+      try visitor.visitSingularUInt32Field(value: v, fieldNumber: 5)
+    } }()
+    if self.abortReason != .unspecified {
+      try visitor.visitSingularEnumField(value: self.abortReason, fieldNumber: 6)
     }
-    if self.totalNumberOfInstructions != 0 {
-      try visitor.visitSingularUInt32Field(value: self.totalNumberOfInstructions, fieldNumber: 6)
+    if !self.reason.isEmpty {
+      try visitor.visitSingularStringField(value: self.reason, fieldNumber: 7)
     }
-    if !self.completedPathSegmentIds.isEmpty {
-      try visitor.visitPackedUInt32Field(value: self.completedPathSegmentIds, fieldNumber: 7)
+    try { if let v = self._endTime {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+    } }()
+    if !self.skippedInstructionIds.isEmpty {
+      try visitor.visitPackedUInt32Field(value: self.skippedInstructionIds, fieldNumber: 9)
     }
-    if self.totalNumberOfPathSegments != 0 {
-      try visitor.visitSingularUInt32Field(value: self.totalNumberOfPathSegments, fieldNumber: 8)
-    }
-    if self.id != 0 {
-      try visitor.visitSingularUInt32Field(value: self.id, fieldNumber: 9)
+    if self.loadID != 0 {
+      try visitor.visitSingularUInt64Field(value: self.loadID, fieldNumber: 10)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  public static func ==(lhs: Blueye_Protocol_MissionStatus, rhs: Blueye_Protocol_MissionStatus) -> Bool {
+  public static func ==(lhs: Blueye_Protocol_MissionOutcome, rhs: Blueye_Protocol_MissionOutcome) -> Bool {
+    if lhs.result != rhs.result {return false}
+    if lhs.missionID != rhs.missionID {return false}
+    if lhs.missionUuid != rhs.missionUuid {return false}
+    if lhs.revision != rhs.revision {return false}
+    if lhs._instructionID != rhs._instructionID {return false}
+    if lhs.abortReason != rhs.abortReason {return false}
+    if lhs.reason != rhs.reason {return false}
+    if lhs._endTime != rhs._endTime {return false}
+    if lhs.skippedInstructionIds != rhs.skippedInstructionIds {return false}
+    if lhs.loadID != rhs.loadID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_InstructionResult: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".InstructionResult"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}request_id\0\u{3}instruction_id\0\u{1}state\0\u{1}reason\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.requestID) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.instructionID) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.state) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.reason) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.requestID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.requestID, fieldNumber: 1)
+    }
+    if self.instructionID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.instructionID, fieldNumber: 2)
+    }
+    if self.state != .unspecified {
+      try visitor.visitSingularEnumField(value: self.state, fieldNumber: 3)
+    }
+    if !self.reason.isEmpty {
+      try visitor.visitSingularStringField(value: self.reason, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_InstructionResult, rhs: Blueye_Protocol_InstructionResult) -> Bool {
+    if lhs.requestID != rhs.requestID {return false}
+    if lhs.instructionID != rhs.instructionID {return false}
     if lhs.state != rhs.state {return false}
-    if lhs.timeElapsed != rhs.timeElapsed {return false}
-    if lhs.estimatedTimeToComplete != rhs.estimatedTimeToComplete {return false}
-    if lhs.distanceToComplete != rhs.distanceToComplete {return false}
-    if lhs.completedInstructionIds != rhs.completedInstructionIds {return false}
-    if lhs.totalNumberOfInstructions != rhs.totalNumberOfInstructions {return false}
-    if lhs.completedPathSegmentIds != rhs.completedPathSegmentIds {return false}
-    if lhs.totalNumberOfPathSegments != rhs.totalNumberOfPathSegments {return false}
-    if lhs.id != rhs.id {return false}
+    if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

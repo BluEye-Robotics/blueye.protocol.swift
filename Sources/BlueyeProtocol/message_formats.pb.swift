@@ -464,6 +464,26 @@ public nonisolated enum Blueye_Protocol_NotificationType: SwiftProtobuf.Enum, Sw
 
   /// DVL firmware speaks a protocol version Blunux does not support.
   case dvlProtocolUnsupported // = 34
+
+  /// An instruction started; the value names it or is its target.
+  case instructionStarted // = 35
+
+  /// Paused after the instruction whose id is the value.
+  case missionPausedByInstruction // = 36
+
+  /// The loaded mission was changed; the value says what changed.
+  case missionUpdated // = 37
+
+  /// A mission rule fired; the value is its name.
+  case missionRuleFired // = 38
+
+  /// A mission rule released; the value is its name.
+  case missionRuleReleased // = 39
+
+  /// A multibeam instruction was made for a different sonar than the one the multibeam driver
+  /// reports; the value is the instruction's id. A MultibeamConfigCommand is skipped. An
+  /// ActivateMultibeamCommand still starts or stops the driver, but without its configuration.
+  case multibeamSonarMismatch // = 40
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -507,6 +527,12 @@ public nonisolated enum Blueye_Protocol_NotificationType: SwiftProtobuf.Enum, Sw
     case 32: self = .dvlThermalProtectionModeDetected
     case 33: self = .videoPartitionNotMounted
     case 34: self = .dvlProtocolUnsupported
+    case 35: self = .instructionStarted
+    case 36: self = .missionPausedByInstruction
+    case 37: self = .missionUpdated
+    case 38: self = .missionRuleFired
+    case 39: self = .missionRuleReleased
+    case 40: self = .multibeamSonarMismatch
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -548,6 +574,12 @@ public nonisolated enum Blueye_Protocol_NotificationType: SwiftProtobuf.Enum, Sw
     case .dvlThermalProtectionModeDetected: return 32
     case .videoPartitionNotMounted: return 33
     case .dvlProtocolUnsupported: return 34
+    case .instructionStarted: return 35
+    case .missionPausedByInstruction: return 36
+    case .missionUpdated: return 37
+    case .missionRuleFired: return 38
+    case .missionRuleReleased: return 39
+    case .multibeamSonarMismatch: return 40
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -589,6 +621,12 @@ public nonisolated enum Blueye_Protocol_NotificationType: SwiftProtobuf.Enum, Sw
     .dvlThermalProtectionModeDetected,
     .videoPartitionNotMounted,
     .dvlProtocolUnsupported,
+    .instructionStarted,
+    .missionPausedByInstruction,
+    .missionUpdated,
+    .missionRuleFired,
+    .missionRuleReleased,
+    .multibeamSonarMismatch,
   ]
 
 }
@@ -8724,7 +8762,7 @@ nonisolated extension Blueye_Protocol_ResetCoordinateSource: SwiftProtobuf._Prot
 }
 
 nonisolated extension Blueye_Protocol_NotificationType: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0NOTIFICATION_TYPE_UNSPECIFIED\0\u{1}NOTIFICATION_TYPE_POSITION_ESTIMATE_IS_INACCURATE\0\u{1}NOTIFICATION_TYPE_DRONE_POSITION_IS_UNKNOWN\0\u{1}NOTIFICATION_TYPE_USER_POSITION_IS_UNKNOWN\0\u{1}NOTIFICATION_TYPE_NO_MISSION_LOADED\0\u{1}NOTIFICATION_TYPE_MISSION_LOADED\0\u{1}NOTIFICATION_TYPE_FAILED_TO_LOAD_MISSION\0\u{1}NOTIFICATION_TYPE_MISSION_COMPLETE\0\u{1}NOTIFICATION_TYPE_INSTRUCTION_COMPLETE\0\u{1}NOTIFICATION_TYPE_WAYPOINT_REACHED\0\u{1}NOTIFICATION_TYPE_DEPTH_TARGET_REACHED\0\u{1}NOTIFICATION_TYPE_ALTITUDE_TARGET_REACHED\0\u{1}NOTIFICATION_TYPE_WAYPOINT_IS_TOO_FAR_AWAY\0\u{1}NOTIFICATION_TYPE_DEPTH_SET_POINT_IS_TOO_FAR_AWAY\0\u{1}NOTIFICATION_TYPE_TIME_TO_COMPLETE_IS_TOO_LONG\0\u{1}NOTIFICATION_TYPE_RETURNING_TO_HOME\0\u{1}NOTIFICATION_TYPE_GO_TO_SURFACE\0\u{1}NOTIFICATION_TYPE_GO_TO_SEABED\0\u{1}NOTIFICATION_TYPE_GO_TO_WAYPOINT\0\u{1}NOTIFICATION_TYPE_GO_TO_DEPTH_SET_POINT\0\u{1}NOTIFICATION_TYPE_GO_TO_WAYPOINT_WITH_DEPTH_SET_POINT\0\u{1}NOTIFICATION_TYPE_MISSION_STARTED\0\u{1}NOTIFICATION_TYPE_MISSION_PAUSED\0\u{1}NOTIFICATION_TYPE_MISSION_RESUMED\0\u{1}NOTIFICATION_TYPE_MISSION_ABORTED\0\u{1}NOTIFICATION_TYPE_DRONE_IS_STUCK\0\u{1}NOTIFICATION_TYPE_WAIT_FOR\0\u{1}NOTIFICATION_TYPE_CAMERA_ACTION\0\u{1}NOTIFICATION_TYPE_SET_TILT_MAIN_CAMERA\0\u{1}NOTIFICATION_TYPE_SET_TILT_MULTIBEAM\0\u{1}NOTIFICATION_TYPE_INSTRUCTION_SKIPPED\0\u{1}NOTIFICATION_TYPE_DVL_HIGH_TEMPERATURE_DETECTED\0\u{1}NOTIFICATION_TYPE_DVL_THERMAL_PROTECTION_MODE_DETECTED\0\u{1}NOTIFICATION_TYPE_VIDEO_PARTITION_NOT_MOUNTED\0\u{1}NOTIFICATION_TYPE_DVL_PROTOCOL_UNSUPPORTED\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0NOTIFICATION_TYPE_UNSPECIFIED\0\u{1}NOTIFICATION_TYPE_POSITION_ESTIMATE_IS_INACCURATE\0\u{1}NOTIFICATION_TYPE_DRONE_POSITION_IS_UNKNOWN\0\u{1}NOTIFICATION_TYPE_USER_POSITION_IS_UNKNOWN\0\u{1}NOTIFICATION_TYPE_NO_MISSION_LOADED\0\u{1}NOTIFICATION_TYPE_MISSION_LOADED\0\u{1}NOTIFICATION_TYPE_FAILED_TO_LOAD_MISSION\0\u{1}NOTIFICATION_TYPE_MISSION_COMPLETE\0\u{1}NOTIFICATION_TYPE_INSTRUCTION_COMPLETE\0\u{1}NOTIFICATION_TYPE_WAYPOINT_REACHED\0\u{1}NOTIFICATION_TYPE_DEPTH_TARGET_REACHED\0\u{1}NOTIFICATION_TYPE_ALTITUDE_TARGET_REACHED\0\u{1}NOTIFICATION_TYPE_WAYPOINT_IS_TOO_FAR_AWAY\0\u{1}NOTIFICATION_TYPE_DEPTH_SET_POINT_IS_TOO_FAR_AWAY\0\u{1}NOTIFICATION_TYPE_TIME_TO_COMPLETE_IS_TOO_LONG\0\u{1}NOTIFICATION_TYPE_RETURNING_TO_HOME\0\u{1}NOTIFICATION_TYPE_GO_TO_SURFACE\0\u{1}NOTIFICATION_TYPE_GO_TO_SEABED\0\u{1}NOTIFICATION_TYPE_GO_TO_WAYPOINT\0\u{1}NOTIFICATION_TYPE_GO_TO_DEPTH_SET_POINT\0\u{1}NOTIFICATION_TYPE_GO_TO_WAYPOINT_WITH_DEPTH_SET_POINT\0\u{1}NOTIFICATION_TYPE_MISSION_STARTED\0\u{1}NOTIFICATION_TYPE_MISSION_PAUSED\0\u{1}NOTIFICATION_TYPE_MISSION_RESUMED\0\u{1}NOTIFICATION_TYPE_MISSION_ABORTED\0\u{1}NOTIFICATION_TYPE_DRONE_IS_STUCK\0\u{1}NOTIFICATION_TYPE_WAIT_FOR\0\u{1}NOTIFICATION_TYPE_CAMERA_ACTION\0\u{1}NOTIFICATION_TYPE_SET_TILT_MAIN_CAMERA\0\u{1}NOTIFICATION_TYPE_SET_TILT_MULTIBEAM\0\u{1}NOTIFICATION_TYPE_INSTRUCTION_SKIPPED\0\u{1}NOTIFICATION_TYPE_DVL_HIGH_TEMPERATURE_DETECTED\0\u{1}NOTIFICATION_TYPE_DVL_THERMAL_PROTECTION_MODE_DETECTED\0\u{1}NOTIFICATION_TYPE_VIDEO_PARTITION_NOT_MOUNTED\0\u{1}NOTIFICATION_TYPE_DVL_PROTOCOL_UNSUPPORTED\0\u{1}NOTIFICATION_TYPE_INSTRUCTION_STARTED\0\u{1}NOTIFICATION_TYPE_MISSION_PAUSED_BY_INSTRUCTION\0\u{1}NOTIFICATION_TYPE_MISSION_UPDATED\0\u{1}NOTIFICATION_TYPE_MISSION_RULE_FIRED\0\u{1}NOTIFICATION_TYPE_MISSION_RULE_RELEASED\0\u{1}NOTIFICATION_TYPE_MULTIBEAM_SONAR_MISMATCH\0")
 }
 
 nonisolated extension Blueye_Protocol_NotificationLevel: SwiftProtobuf._ProtoNameProviding {

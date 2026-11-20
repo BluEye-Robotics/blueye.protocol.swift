@@ -277,6 +277,46 @@ public nonisolated struct Blueye_Protocol_NotificationTel: Sendable {
   fileprivate var _notification: Blueye_Protocol_Notification? = nil
 }
 
+/// Result of an instruction started with RunInstructionCtrl.
+///
+/// Published when the instruction is accepted or rejected, and again when it completes, fails or
+/// is cancelled.
+public nonisolated struct Blueye_Protocol_InstructionResultTel: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Result of the instruction.
+  public var result: Blueye_Protocol_InstructionResult {
+    get {_result ?? Blueye_Protocol_InstructionResult()}
+    set {_result = newValue}
+  }
+  /// Returns true if `result` has been explicitly set.
+  public var hasResult: Bool {self._result != nil}
+  /// Clears the value of `result`. Subsequent reads from it will return its default value.
+  public mutating func clearResult() {self._result = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _result: Blueye_Protocol_InstructionResult? = nil
+}
+
+/// State of the mission rules.
+public nonisolated struct Blueye_Protocol_MissionRulesTel: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// One entry per rule.
+  public var rules: [Blueye_Protocol_MissionRuleStatus] = []
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 /// Control force in all directions.
 public nonisolated struct Blueye_Protocol_ControlForceTel: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -2365,6 +2405,70 @@ nonisolated extension Blueye_Protocol_NotificationTel: SwiftProtobuf.Message, Sw
 
   public static func ==(lhs: Blueye_Protocol_NotificationTel, rhs: Blueye_Protocol_NotificationTel) -> Bool {
     if lhs._notification != rhs._notification {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_InstructionResultTel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".InstructionResultTel"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}result\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._result) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._result {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_InstructionResultTel, rhs: Blueye_Protocol_InstructionResultTel) -> Bool {
+    if lhs._result != rhs._result {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_MissionRulesTel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".MissionRulesTel"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}rules\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.rules) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.rules.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.rules, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_MissionRulesTel, rhs: Blueye_Protocol_MissionRulesTel) -> Bool {
+    if lhs.rules != rhs.rules {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
