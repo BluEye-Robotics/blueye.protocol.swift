@@ -4848,6 +4848,12 @@ public nonisolated struct Blueye_Protocol_Reference: Sendable {
   /// Reference used in auto altitude mode (m).
   public var altitude: Float = 0
 
+  /// Reference roll angle (°). Zero on drones without roll control.
+  public var roll: Float = 0
+
+  /// Reference pitch angle (°). Zero on drones without pitch control.
+  public var pitch: Float = 0
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
@@ -4893,7 +4899,7 @@ public nonisolated struct Blueye_Protocol_Notification: Sendable {
   fileprivate var _timestamp: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
-/// Control Force is used for showing the requested control force in each direction in Newtons.
+/// Control Force is used for showing the requested control force and moment in each degree of freedom.
 public nonisolated struct Blueye_Protocol_ControlForce: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -4910,6 +4916,12 @@ public nonisolated struct Blueye_Protocol_ControlForce: Sendable {
 
   /// Moment in yaw (Nm).
   public var yaw: Float = 0
+
+  /// Moment in roll (Nm). Zero on drones without roll control.
+  public var roll: Float = 0
+
+  /// Moment in pitch (Nm). Zero on drones without pitch control.
+  public var pitch: Float = 0
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -12343,7 +12355,7 @@ nonisolated extension Blueye_Protocol_Depth: SwiftProtobuf.Message, SwiftProtobu
 
 nonisolated extension Blueye_Protocol_Reference: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".Reference"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}surge\0\u{1}sway\0\u{1}heave\0\u{1}yaw\0\u{1}depth\0\u{1}heading\0\u{1}altitude\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}surge\0\u{1}sway\0\u{1}heave\0\u{1}yaw\0\u{1}depth\0\u{1}heading\0\u{1}altitude\0\u{1}roll\0\u{1}pitch\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -12358,6 +12370,8 @@ nonisolated extension Blueye_Protocol_Reference: SwiftProtobuf.Message, SwiftPro
       case 5: try { try decoder.decodeSingularFloatField(value: &self.depth) }()
       case 6: try { try decoder.decodeSingularFloatField(value: &self.heading) }()
       case 7: try { try decoder.decodeSingularFloatField(value: &self.altitude) }()
+      case 8: try { try decoder.decodeSingularFloatField(value: &self.roll) }()
+      case 9: try { try decoder.decodeSingularFloatField(value: &self.pitch) }()
       default: break
       }
     }
@@ -12385,6 +12399,12 @@ nonisolated extension Blueye_Protocol_Reference: SwiftProtobuf.Message, SwiftPro
     if self.altitude.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.altitude, fieldNumber: 7)
     }
+    if self.roll.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.roll, fieldNumber: 8)
+    }
+    if self.pitch.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.pitch, fieldNumber: 9)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -12396,6 +12416,8 @@ nonisolated extension Blueye_Protocol_Reference: SwiftProtobuf.Message, SwiftPro
     if lhs.depth != rhs.depth {return false}
     if lhs.heading != rhs.heading {return false}
     if lhs.altitude != rhs.altitude {return false}
+    if lhs.roll != rhs.roll {return false}
+    if lhs.pitch != rhs.pitch {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -12452,7 +12474,7 @@ nonisolated extension Blueye_Protocol_Notification: SwiftProtobuf.Message, Swift
 
 nonisolated extension Blueye_Protocol_ControlForce: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".ControlForce"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}surge\0\u{1}sway\0\u{1}heave\0\u{1}yaw\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}surge\0\u{1}sway\0\u{1}heave\0\u{1}yaw\0\u{1}roll\0\u{1}pitch\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -12464,6 +12486,8 @@ nonisolated extension Blueye_Protocol_ControlForce: SwiftProtobuf.Message, Swift
       case 2: try { try decoder.decodeSingularFloatField(value: &self.sway) }()
       case 3: try { try decoder.decodeSingularFloatField(value: &self.heave) }()
       case 4: try { try decoder.decodeSingularFloatField(value: &self.yaw) }()
+      case 5: try { try decoder.decodeSingularFloatField(value: &self.roll) }()
+      case 6: try { try decoder.decodeSingularFloatField(value: &self.pitch) }()
       default: break
       }
     }
@@ -12482,6 +12506,12 @@ nonisolated extension Blueye_Protocol_ControlForce: SwiftProtobuf.Message, Swift
     if self.yaw.bitPattern != 0 {
       try visitor.visitSingularFloatField(value: self.yaw, fieldNumber: 4)
     }
+    if self.roll.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.roll, fieldNumber: 5)
+    }
+    if self.pitch.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.pitch, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -12490,6 +12520,8 @@ nonisolated extension Blueye_Protocol_ControlForce: SwiftProtobuf.Message, Swift
     if lhs.sway != rhs.sway {return false}
     if lhs.heave != rhs.heave {return false}
     if lhs.yaw != rhs.yaw {return false}
+    if lhs.roll != rhs.roll {return false}
+    if lhs.pitch != rhs.pitch {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
