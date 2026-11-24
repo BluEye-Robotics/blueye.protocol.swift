@@ -1243,7 +1243,8 @@ public nonisolated struct Blueye_Protocol_Waypoint: Sendable {
   /// Desired speed over ground to waypoint (m/s).
   public var speedToTarget: Float = 0
 
-  /// Depth set point (optional).
+  /// Depth set point (optional). Left out, the drone keeps its depth. A depth of 0 m from the
+  /// surface brings the drone to the surface and holds it there; an altitude of 0 m counts as left out.
   public var depthSetPoint: Blueye_Protocol_DepthSetPoint {
     get {_depthSetPoint ?? Blueye_Protocol_DepthSetPoint()}
     set {_depthSetPoint = newValue}
@@ -1454,8 +1455,8 @@ public nonisolated struct Blueye_Protocol_Trigger: Sendable {
 /// a rule has to carry at least one instruction in one of its lists. A rule with no triggers never
 /// fires. Instructions that move the drone (waypoint, go to home,
 /// transect, survey, depth set point, relative depth, go to surface or seabed, control mode,
-/// heading) and waits are refused in rules; camera, tilt, lights, laser, multibeam, tilt
-/// stabilization, CV model, annotation and cruise speed are allowed.
+/// heading), waits and cruise speed are refused in rules; camera, tilt, lights, laser, multibeam,
+/// tilt stabilization, CV model and annotation are allowed.
 public nonisolated struct Blueye_Protocol_MissionRule: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1469,12 +1470,6 @@ public nonisolated struct Blueye_Protocol_MissionRule: Sendable {
 
   /// A disabled rule never fires. Rules run unless this is set.
   public var disabled: Bool = false
-
-  /// Run when the rule fires.
-  public var enterInstructions: [Blueye_Protocol_Instruction] = []
-
-  /// Run when the rule releases.
-  public var exitInstructions: [Blueye_Protocol_Instruction] = []
 
   /// Conditions that must all be satisfied at once for the rule to fire.
   public var triggers: [Blueye_Protocol_Trigger] = []
@@ -1508,6 +1503,12 @@ public nonisolated struct Blueye_Protocol_MissionRule: Sendable {
   public var hasCooldownDuration: Bool {self._cooldownDuration != nil}
   /// Clears the value of `cooldownDuration`. Subsequent reads from it will return its default value.
   public mutating func clearCooldownDuration() {self._cooldownDuration = nil}
+
+  /// Run when the rule fires.
+  public var enterInstructions: [Blueye_Protocol_Instruction] = []
+
+  /// Run when the rule releases.
+  public var exitInstructions: [Blueye_Protocol_Instruction] = []
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -2047,7 +2048,8 @@ public nonisolated struct Blueye_Protocol_TransectCommand: Sendable {
   /// Desired speed over ground (m/s). The mission default when 0.
   public var speedToTarget: Float = 0
 
-  /// Optional depth or altitude to hold along the line.
+  /// Optional depth or altitude to hold along the line. Left out, the drone keeps its depth.
+  /// A depth of 0 m from the surface holds the surface; an altitude of 0 m counts as left out.
   public var depthSetPoint: Blueye_Protocol_DepthSetPoint {
     get {_depthSetPoint ?? Blueye_Protocol_DepthSetPoint()}
     set {_depthSetPoint = newValue}
@@ -2135,7 +2137,8 @@ public nonisolated struct Blueye_Protocol_SurveyCommand: Sendable {
   /// Radius of acceptance circle for generated waypoints (m).
   public var circleOfAcceptance: Float = 0
 
-  /// Optional depth set point for all generated waypoints.
+  /// Optional depth set point for the generated waypoints that carry none, which they then hold
+  /// as a waypoint's own depth set point. Left out, the drone keeps its depth.
   public var depthSetPoint: Blueye_Protocol_DepthSetPoint {
     get {_depthSetPoint ?? Blueye_Protocol_DepthSetPoint()}
     set {_depthSetPoint = newValue}
@@ -3159,7 +3162,7 @@ nonisolated extension Blueye_Protocol_ControlModeCommand: SwiftProtobuf.Message,
 
 nonisolated extension Blueye_Protocol_DetectionTrigger: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".DetectionTrigger"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}class_names\0\u{3}model_name\0\u{1}camera\0\u{3}min_confidence\0\u{3}min_area_fraction\0\u{b}hold_ms\0\u{b}release_ms\0\u{b}cooldown_ms\0\u{c}\u{6}\u{1}\u{c}\u{7}\u{1}\u{c}\u{8}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}class_names\0\u{3}model_name\0\u{1}camera\0\u{3}min_confidence\0\u{3}min_area_fraction\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -3419,7 +3422,7 @@ nonisolated extension Blueye_Protocol_Trigger: SwiftProtobuf.Message, SwiftProto
 
 nonisolated extension Blueye_Protocol_MissionRule: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".MissionRule"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}disabled\0\u{4}\u{2}enter_instructions\0\u{3}exit_instructions\0\u{1}triggers\0\u{3}hold_duration\0\u{3}release_duration\0\u{3}cooldown_duration\0\u{b}detection_trigger\0\u{c}\u{4}\u{1}")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}id\0\u{1}name\0\u{1}disabled\0\u{1}triggers\0\u{3}hold_duration\0\u{3}release_duration\0\u{3}cooldown_duration\0\u{3}enter_instructions\0\u{3}exit_instructions\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -3430,12 +3433,12 @@ nonisolated extension Blueye_Protocol_MissionRule: SwiftProtobuf.Message, SwiftP
       case 1: try { try decoder.decodeSingularUInt32Field(value: &self.id) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
-      case 5: try { try decoder.decodeRepeatedMessageField(value: &self.enterInstructions) }()
-      case 6: try { try decoder.decodeRepeatedMessageField(value: &self.exitInstructions) }()
-      case 7: try { try decoder.decodeRepeatedMessageField(value: &self.triggers) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._holdDuration) }()
-      case 9: try { try decoder.decodeSingularMessageField(value: &self._releaseDuration) }()
-      case 10: try { try decoder.decodeSingularMessageField(value: &self._cooldownDuration) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.triggers) }()
+      case 5: try { try decoder.decodeSingularMessageField(value: &self._holdDuration) }()
+      case 6: try { try decoder.decodeSingularMessageField(value: &self._releaseDuration) }()
+      case 7: try { try decoder.decodeSingularMessageField(value: &self._cooldownDuration) }()
+      case 8: try { try decoder.decodeRepeatedMessageField(value: &self.enterInstructions) }()
+      case 9: try { try decoder.decodeRepeatedMessageField(value: &self.exitInstructions) }()
       default: break
       }
     }
@@ -3455,24 +3458,24 @@ nonisolated extension Blueye_Protocol_MissionRule: SwiftProtobuf.Message, SwiftP
     if self.disabled != false {
       try visitor.visitSingularBoolField(value: self.disabled, fieldNumber: 3)
     }
-    if !self.enterInstructions.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.enterInstructions, fieldNumber: 5)
-    }
-    if !self.exitInstructions.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.exitInstructions, fieldNumber: 6)
-    }
     if !self.triggers.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.triggers, fieldNumber: 7)
+      try visitor.visitRepeatedMessageField(value: self.triggers, fieldNumber: 4)
     }
     try { if let v = self._holdDuration {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
     } }()
     try { if let v = self._releaseDuration {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
     try { if let v = self._cooldownDuration {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
     } }()
+    if !self.enterInstructions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.enterInstructions, fieldNumber: 8)
+    }
+    if !self.exitInstructions.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.exitInstructions, fieldNumber: 9)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -3480,12 +3483,12 @@ nonisolated extension Blueye_Protocol_MissionRule: SwiftProtobuf.Message, SwiftP
     if lhs.id != rhs.id {return false}
     if lhs.name != rhs.name {return false}
     if lhs.disabled != rhs.disabled {return false}
-    if lhs.enterInstructions != rhs.enterInstructions {return false}
-    if lhs.exitInstructions != rhs.exitInstructions {return false}
     if lhs.triggers != rhs.triggers {return false}
     if lhs._holdDuration != rhs._holdDuration {return false}
     if lhs._releaseDuration != rhs._releaseDuration {return false}
     if lhs._cooldownDuration != rhs._cooldownDuration {return false}
+    if lhs.enterInstructions != rhs.enterInstructions {return false}
+    if lhs.exitInstructions != rhs.exitInstructions {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
