@@ -17,9 +17,9 @@
 /// The SLAM has its own publisher, not the drone's telemetry socket: a client
 /// subscribes to it on the drone at TCP port 5561 (WebSocket 9989) to get the
 /// Slam*Tel messages. Its requests (GetSlamMapReq, ResetSlamReq,
-/// SetSlamActiveReq, SetSlamSensorSettingsReq, SetSlamRecordingReq) go to the
-/// drone's request server as other requests do, which forwards them to the
-/// SLAM's (TCP 5562, WebSocket 9990).
+/// SetSlamActiveReq, SetSlamSensorSettingsReq, SetSlamRecordingReq,
+/// SetSlamBaseMapReq) go to the drone's request server as other requests do,
+/// which forwards them to the SLAM's (TCP 5562, WebSocket 9990).
 ///
 /// These messages change only by addition: new fields, messages, enum values and
 /// oneof members, never a field renumbered, retyped or given another meaning (CI
@@ -117,6 +117,9 @@ public nonisolated enum Blueye_Protocol_SlamSensorType: SwiftProtobuf.Enum, Swif
 
   /// A stereo camera's depth.
   case stereoCamera // = 2
+
+  /// A 2D imaging sonar (multibeam), e.g. the Oculus M750D: range and bearing, no elevation.
+  case multibeam2D // = 3
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -128,6 +131,7 @@ public nonisolated enum Blueye_Protocol_SlamSensorType: SwiftProtobuf.Enum, Swif
     case 0: self = .unspecified
     case 1: self = .sonar3D
     case 2: self = .stereoCamera
+    case 3: self = .multibeam2D
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -137,6 +141,7 @@ public nonisolated enum Blueye_Protocol_SlamSensorType: SwiftProtobuf.Enum, Swif
     case .unspecified: return 0
     case .sonar3D: return 1
     case .stereoCamera: return 2
+    case .multibeam2D: return 3
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -146,6 +151,7 @@ public nonisolated enum Blueye_Protocol_SlamSensorType: SwiftProtobuf.Enum, Swif
     .unspecified,
     .sonar3D,
     .stereoCamera,
+    .multibeam2D,
   ]
 
 }
@@ -241,6 +247,136 @@ public nonisolated enum Blueye_Protocol_Sonar3dFrequencyMode: SwiftProtobuf.Enum
 
 }
 
+/// How the SLAM places the returns of a 2D multibeam sonar, which have a range
+/// and a bearing but no elevation.
+public nonisolated enum Blueye_Protocol_SlamMultibeamMode: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified: left as it is.
+  case unspecified // = 0
+
+  /// By the sonar's tilt: on the seabed when it looks down, in a level plane through it when it is near level.
+  case auto // = 1
+
+  /// On a flat seabed, at the drone's altitude above it (seabed surveys).
+  case seabed // = 2
+
+  /// In a level plane through the sonar, each return at its range, as on walls, piles and nets (the sonar near level).
+  case structure // = 3
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .auto
+    case 2: self = .seabed
+    case 3: self = .structure
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .auto: return 1
+    case .seabed: return 2
+    case .structure: return 3
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamMultibeamMode] = [
+    .unspecified,
+    .auto,
+    .seabed,
+    .structure,
+  ]
+
+}
+
+/// How a raster's pixels are stored.
+public nonisolated enum Blueye_Protocol_SlamRasterFormat: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified.
+  case unspecified // = 0
+
+  /// One byte a pixel, 0 to 255.
+  case uint8 // = 1
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .uint8
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .uint8: return 1
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamRasterFormat] = [
+    .unspecified,
+    .uint8,
+  ]
+
+}
+
+/// What a raster's pixels measure.
+public nonisolated enum Blueye_Protocol_SlamRasterValue: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified.
+  case unspecified // = 0
+
+  /// Echo strength (a sonar mosaic), on one relative scale for all of a sensor's rasters: higher is stronger.
+  case echo // = 1
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .echo
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .echo: return 1
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamRasterValue] = [
+    .unspecified,
+    .echo,
+  ]
+
+}
+
 /// Why the SLAM did not do what a request asked (the reply says what it did do).
 public nonisolated enum Blueye_Protocol_SlamRequestError: SwiftProtobuf.Enum, Swift.CaseIterable {
   public typealias RawValue = Int
@@ -271,6 +407,20 @@ public nonisolated enum Blueye_Protocol_SlamRequestError: SwiftProtobuf.Enum, Sw
 
   /// The SLAM or its sensor cannot do it.
   case notSupported // = 8
+
+  /// It needs a base map, and none is loaded.
+  case noBaseMap // = 9
+
+  /// The base map named cannot be loaded. For a name that is not a bare file name (.sbez), or a file that is not
+  /// there, the reply has this error at once, and the base map before stays. A file that holds no map the SLAM can
+  /// localize in ends its load FAILED, with this error in SlamBaseMapState.error.
+  case baseMapUnreadable // = 10
+
+  /// The request named a load of a base map that is not the current one.
+  case otherBaseMap // = 11
+
+  /// The request named a place found that is not the current one.
+  case otherFix // = 12
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -288,6 +438,10 @@ public nonisolated enum Blueye_Protocol_SlamRequestError: SwiftProtobuf.Enum, Sw
     case 6: self = .notMapping
     case 7: self = .storage
     case 8: self = .notSupported
+    case 9: self = .noBaseMap
+    case 10: self = .baseMapUnreadable
+    case 11: self = .otherBaseMap
+    case 12: self = .otherFix
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -303,6 +457,10 @@ public nonisolated enum Blueye_Protocol_SlamRequestError: SwiftProtobuf.Enum, Sw
     case .notMapping: return 6
     case .storage: return 7
     case .notSupported: return 8
+    case .noBaseMap: return 9
+    case .baseMapUnreadable: return 10
+    case .otherBaseMap: return 11
+    case .otherFix: return 12
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -318,6 +476,10 @@ public nonisolated enum Blueye_Protocol_SlamRequestError: SwiftProtobuf.Enum, Sw
     .notMapping,
     .storage,
     .notSupported,
+    .noBaseMap,
+    .baseMapUnreadable,
+    .otherBaseMap,
+    .otherFix,
   ]
 
 }
@@ -337,6 +499,10 @@ public nonisolated enum Blueye_Protocol_SlamOrientationSource: SwiftProtobuf.Enu
 
   /// The drone's attitude for roll and pitch, its turn from the drone's calibrated gyro (not the compass).
   case droneGyro // = 3
+
+  /// The drone's attitude for roll and pitch, its heading the one the drone's position estimate keeps (its
+  /// navigation's: from a gyro, a DVL or the compass, as the drone has them).
+  case droneEstimate // = 4
   case UNRECOGNIZED(Int)
 
   public init() {
@@ -349,6 +515,7 @@ public nonisolated enum Blueye_Protocol_SlamOrientationSource: SwiftProtobuf.Enu
     case 1: self = .sensorImu
     case 2: self = .droneAttitude
     case 3: self = .droneGyro
+    case 4: self = .droneEstimate
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -359,6 +526,7 @@ public nonisolated enum Blueye_Protocol_SlamOrientationSource: SwiftProtobuf.Enu
     case .sensorImu: return 1
     case .droneAttitude: return 2
     case .droneGyro: return 3
+    case .droneEstimate: return 4
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -369,6 +537,7 @@ public nonisolated enum Blueye_Protocol_SlamOrientationSource: SwiftProtobuf.Enu
     .sensorImu,
     .droneAttitude,
     .droneGyro,
+    .droneEstimate,
   ]
 
 }
@@ -415,6 +584,244 @@ public nonisolated enum Blueye_Protocol_SlamHeadingReference: SwiftProtobuf.Enum
     .unspecified,
     .firstScan,
     .droneCompass,
+  ]
+
+}
+
+/// What placed a SLAM map on the Earth.
+public nonisolated enum Blueye_Protocol_SlamGeoreferenceSource: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// Unspecified.
+  case unspecified // = 0
+
+  /// The drone's GNSS receiver (the Blueye GNSS), from its fixes at the surface.
+  case gnss // = 1
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .gnss
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .gnss: return 1
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamGeoreferenceSource] = [
+    .unspecified,
+    .gnss,
+  ]
+
+}
+
+/// Where finding the SLAM's map in a base map stands. A base map is a map
+/// saved earlier (a recording's, or a file a client uploaded), loaded so that
+/// the SLAM finds where its own map lies in it: it searches the base map for
+/// what it swept lately, and once found, ties its map to the base map with
+/// each later match.
+public nonisolated enum Blueye_Protocol_SlamBaseMapStage: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// No base map.
+  case unspecified // = 0
+
+  /// Being read; a recording without its map file takes longest.
+  case loading // = 1
+
+  /// Loaded; too little swept yet to search with (progress).
+  case sweeping // = 2
+
+  /// Searched, no place taken yet (miss says why).
+  case searching // = 3
+
+  /// A place passed one search; the next must agree before it is taken.
+  case candidate // = 4
+
+  /// Found: base_map_pose is known, and each later match keeps it.
+  case found // = 5
+
+  /// It could not be loaded (error); the SLAM maps without it.
+  case failed // = 6
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .loading
+    case 2: self = .sweeping
+    case 3: self = .searching
+    case 4: self = .candidate
+    case 5: self = .found
+    case 6: self = .failed
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .loading: return 1
+    case .sweeping: return 2
+    case .searching: return 3
+    case .candidate: return 4
+    case .found: return 5
+    case .failed: return 6
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamBaseMapStage] = [
+    .unspecified,
+    .loading,
+    .sweeping,
+    .searching,
+    .candidate,
+    .found,
+    .failed,
+  ]
+
+}
+
+/// Why the last search of a base map took no place.
+public nonisolated enum Blueye_Protocol_SlamBaseMapMiss: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// None: a place was taken, or nothing searched yet.
+  case unspecified // = 0
+
+  /// Nothing scored: what was swept matched nothing in the base map.
+  case noMatch // = 1
+
+  /// Too little of what was swept lies on the base map: the drone may be off it.
+  case offMap // = 2
+
+  /// Another place scores nearly as well: places that look alike.
+  case ambiguous // = 3
+
+  /// Only places a client rejected scored (SlamBaseMapReject).
+  case rejected // = 4
+
+  /// Found before; near there this search scored too low (the drone may be off it).
+  case weak // = 5
+
+  /// A place outside the hint scored better than any in it, by the margin a place needs: the hint was dropped.
+  case outsideHint // = 6
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .noMatch
+    case 2: self = .offMap
+    case 3: self = .ambiguous
+    case 4: self = .rejected
+    case 5: self = .weak
+    case 6: self = .outsideHint
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .noMatch: return 1
+    case .offMap: return 2
+    case .ambiguous: return 3
+    case .rejected: return 4
+    case .weak: return 5
+    case .outsideHint: return 6
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamBaseMapMiss] = [
+    .unspecified,
+    .noMatch,
+    .offMap,
+    .ambiguous,
+    .rejected,
+    .weak,
+    .outsideHint,
+  ]
+
+}
+
+/// What a client may ask of the base map (SetSlamBaseMapReq's actions).
+public nonisolated enum Blueye_Protocol_SlamBaseMapAction: SwiftProtobuf.Enum, Swift.CaseIterable {
+  public typealias RawValue = Int
+
+  /// None.
+  case unspecified // = 0
+
+  /// SlamBaseMapLoad.
+  case load // = 1
+
+  /// SlamBaseMapClear.
+  case clear // = 2
+
+  /// SlamBaseMapReject.
+  case reject // = 3
+
+  /// SlamBaseMapHint.
+  case hint // = 4
+  case UNRECOGNIZED(Int)
+
+  public init() {
+    self = .unspecified
+  }
+
+  public init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .load
+    case 2: self = .clear
+    case 3: self = .reject
+    case 4: self = .hint
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  public var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .load: return 1
+    case .clear: return 2
+    case .reject: return 3
+    case .hint: return 4
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  public static let allCases: [Blueye_Protocol_SlamBaseMapAction] = [
+    .unspecified,
+    .load,
+    .clear,
+    .reject,
+    .hint,
   ]
 
 }
@@ -512,6 +919,25 @@ public nonisolated struct Blueye_Protocol_SlamSonar3dSettings: Sendable {
   public init() {}
 }
 
+/// Settings of a 2D multibeam sonar that feeds the SLAM.
+///
+/// The sonar's own settings (range, gain, frequency, ping rate) belong to the
+/// multibeam page: the SLAM reads the sonar's images and follows those settings
+/// without changing them. In a request, unspecified leaves a setting as it is; in
+/// a report, the mode is as set (AUTO, not the one it chose).
+public nonisolated struct Blueye_Protocol_SlamMultibeamSettings: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// How the returns are placed.
+  public var mode: Blueye_Protocol_SlamMultibeamMode = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
 /// Settings of a sensor that feeds the SLAM.
 ///
 /// One message for each kind of sensor, so a client shows the settings of the
@@ -532,11 +958,22 @@ public nonisolated struct Blueye_Protocol_SlamSensorSettings: Sendable {
     set {settings = .sonar3D(newValue)}
   }
 
+  /// A 2D multibeam sonar's settings.
+  public var multibeam: Blueye_Protocol_SlamMultibeamSettings {
+    get {
+      if case .multibeam(let v)? = settings {return v}
+      return Blueye_Protocol_SlamMultibeamSettings()
+    }
+    set {settings = .multibeam(newValue)}
+  }
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public nonisolated enum OneOf_Settings: Equatable, Sendable {
     /// A 3D imaging sonar's settings.
     case sonar3D(Blueye_Protocol_SlamSonar3dSettings)
+    /// A 2D multibeam sonar's settings.
+    case multibeam(Blueye_Protocol_SlamMultibeamSettings)
 
   }
 
@@ -604,7 +1041,8 @@ public nonisolated struct Blueye_Protocol_SlamSensorStatus: @unchecked Sendable 
 /// y to the right of it, in metres. The body is the one the field names (the
 /// platform, or a sensor), its frame x forward, y right, z down. A mount is a
 /// sensor's pose in the platform's frame instead: the sensor is in the map at the
-/// platform's pose times its mount.
+/// platform's pose times its mount. A raster's origin is its pose in the frame the
+/// enclosing message names (see SlamRaster).
 public nonisolated struct Blueye_Protocol_SlamPose: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -689,7 +1127,7 @@ public nonisolated struct Blueye_Protocol_SlamPoseEstimate: @unchecked Sendable 
   }
 
   /// Root mean square residual of the matched points against the map (m); for a 3D sonar, their distance to the
-  /// map's planes.
+  /// map's planes. 0 when the matcher has none (a 2D multibeam matches images).
   public var matchRms: Float {
     get {_storage._matchRms}
     set {_uniqueStorage()._matchRms = newValue}
@@ -772,7 +1210,7 @@ public nonisolated struct Blueye_Protocol_SlamKeyframe: @unchecked Sendable {
     set {_uniqueStorage()._id = newValue}
   }
 
-  /// Submap whose points the keyframe added to.
+  /// Submap whose content the keyframe added to.
   public var submapID: UInt32 {
     get {_storage._submapID}
     set {_uniqueStorage()._submapID = newValue}
@@ -821,41 +1259,131 @@ public nonisolated struct Blueye_Protocol_SlamKeyframe: @unchecked Sendable {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
+/// A raster: an image laid on a plane, such as a 2D imaging sonar's mosaic of what
+/// it saw around a submap.
+///
+/// The raster has a frame of its own, which origin places in the frame the
+/// enclosing message names: in a SlamSubmap, the platform's frame at its anchor
+/// keyframe, so the raster is in the map at the anchor's pose times its origin. It
+/// lies on the plane z = 0 of its frame, with the corner of row 0 and column 0 at
+/// the origin: row r and column c cover x from r * resolution and y from
+/// c * resolution, each over one resolution.
+///
+/// Its planes come deflated (zlib): pixels_deflated inflates to exactly
+/// rows * columns pixels as pixel_format stores them, and coverage_deflated is
+/// empty or inflates to exactly rows * columns bytes. A raster that disagrees, whose
+/// resolution is not positive or origin is unset, or whose pixel_format or value the
+/// client does not know, is not used: the submap keeps the raster it had. A change
+/// to how pixels are placed or read comes as a new pixel_format, a new kind of
+/// content, or new fields that leave pixels_deflated empty, never as a field old
+/// clients would ignore while they read pixels_deflated.
+public nonisolated struct Blueye_Protocol_SlamRaster: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The raster's frame, in the frame the enclosing message names.
+  public var origin: Blueye_Protocol_SlamPose {
+    get {_origin ?? Blueye_Protocol_SlamPose()}
+    set {_origin = newValue}
+  }
+  /// Returns true if `origin` has been explicitly set.
+  public var hasOrigin: Bool {self._origin != nil}
+  /// Clears the value of `origin`. Subsequent reads from it will return its default value.
+  public mutating func clearOrigin() {self._origin = nil}
+
+  /// Rows: the raster spans rows * resolution along its x.
+  public var rows: UInt32 = 0
+
+  /// Columns: the raster spans columns * resolution along its y.
+  public var columns: UInt32 = 0
+
+  /// Size of a pixel, along x and along y (m). Rasters of one map may differ in it: a multibeam's submaps are
+  /// painted as finely as their sonar's range calls for.
+  public var resolution: Float = 0
+
+  /// How the pixels are stored.
+  public var pixelFormat: Blueye_Protocol_SlamRasterFormat = .unspecified
+
+  /// What the pixels measure.
+  public var value: Blueye_Protocol_SlamRasterValue = .unspecified
+
+  /// The pixels, rows * columns of them row by row, each as pixel_format stores it, compressed with zlib
+  /// (deflate in a zlib stream, RFC 1950): a fraction of the bytes over the link.
+  public var pixelsDeflated: Data = Data()
+
+  /// How well each pixel was seen, compressed the same way: rows * columns bytes, row by row, from 0 (not
+  /// seen: the pixel holds nothing) to 255, for weighing rasters where they overlap. Empty: every pixel seen
+  /// fully, as 255.
+  public var coverageDeflated: Data = Data()
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _origin: Blueye_Protocol_SlamPose? = nil
+}
+
 /// A submap: part of the map from one sensor, in the platform's frame at its anchor
 /// keyframe.
 ///
 /// A submap moves rigidly with its anchor keyframe, so a correction of the
 /// trajectory moves its content without sending it again. A submap holds one kind
-/// of content: points today; other kinds (e.g. a 2D sonar's mosaic) will be added
-/// to the oneof, each saying how a later one replaces what the submap holds.
-public nonisolated struct Blueye_Protocol_SlamSubmap: Sendable {
+/// of content: points, or a raster (e.g. a 2D sonar's mosaic). Each kind says how
+/// a later one replaces what the submap holds.
+public nonisolated struct Blueye_Protocol_SlamSubmap: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// Submap id.
-  public var submapID: UInt32 = 0
+  public var submapID: UInt32 {
+    get {_storage._submapID}
+    set {_uniqueStorage()._submapID = newValue}
+  }
 
   /// Keyframe whose platform frame the content is in.
-  public var anchorKeyframeID: UInt32 = 0
+  public var anchorKeyframeID: UInt32 {
+    get {_storage._anchorKeyframeID}
+    set {_uniqueStorage()._anchorKeyframeID = newValue}
+  }
 
   /// Sensor the content comes from (SlamSensor.id).
-  public var sensorID: String = String()
+  public var sensorID: String {
+    get {_storage._sensorID}
+    set {_uniqueStorage()._sensorID = newValue}
+  }
 
-  public var content: Blueye_Protocol_SlamSubmap.OneOf_Content? = nil
+  public var content: OneOf_Content? {
+    get {return _storage._content}
+    set {_uniqueStorage()._content = newValue}
+  }
 
   /// Points in the platform's frame at the anchor keyframe. In a map update they are appended to the
   /// submap's points, unless replace is set.
   public var points: Blueye_Protocol_PointCloud {
     get {
-      if case .points(let v)? = content {return v}
+      if case .points(let v)? = _storage._content {return v}
       return Blueye_Protocol_PointCloud()
     }
-    set {content = .points(newValue)}
+    set {_uniqueStorage()._content = .points(newValue)}
+  }
+
+  /// A raster placed in the platform's frame at the anchor keyframe (SlamRaster.origin). It is sent
+  /// whole, and replaces the submap's raster so far: as the submap grows, its raster is sent again.
+  public var raster: Blueye_Protocol_SlamRaster {
+    get {
+      if case .raster(let v)? = _storage._content {return v}
+      return Blueye_Protocol_SlamRaster()
+    }
+    set {_uniqueStorage()._content = .raster(newValue)}
   }
 
   /// Points: true if they replace the submap's points so far, rather than adding to them.
-  public var replace: Bool = false
+  public var replace: Bool {
+    get {_storage._replace}
+    set {_uniqueStorage()._replace = newValue}
+  }
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -863,10 +1391,15 @@ public nonisolated struct Blueye_Protocol_SlamSubmap: Sendable {
     /// Points in the platform's frame at the anchor keyframe. In a map update they are appended to the
     /// submap's points, unless replace is set.
     case points(Blueye_Protocol_PointCloud)
+    /// A raster placed in the platform's frame at the anchor keyframe (SlamRaster.origin). It is sent
+    /// whole, and replaces the submap's raster so far: as the submap grows, its raster is sent again.
+    case raster(Blueye_Protocol_SlamRaster)
 
   }
 
   public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 /// Poses of consecutive keyframes, packed: what a correction of the trajectory
@@ -936,7 +1469,7 @@ public nonisolated struct Blueye_Protocol_SlamMapUpdate: Sendable {
   /// Keyframes added.
   public var keyframes: [Blueye_Protocol_SlamKeyframe] = []
 
-  /// Content added to submaps, or replacing a submap's (SlamSubmap.replace).
+  /// Content added to submaps, or replacing a submap's: points with SlamSubmap.replace set, and rasters.
   public var submaps: [Blueye_Protocol_SlamSubmap] = []
 
   /// The map's frame, on the update that adds the first keyframe and on any that
@@ -986,23 +1519,115 @@ public nonisolated struct Blueye_Protocol_SlamAiding: Sendable {
   public init() {}
 }
 
+/// Where a SLAM map lies on the Earth, as position fixes placed it: a point of the map, where it lies, and the
+/// bearing of the map's x axis.
+///
+/// The fixes do not bend the map: it moves and turns as a whole. A point (x, y) of the map lies
+/// R(bearing) (x - anchor_x, y - anchor_y) north and east of anchor_position, where R turns north towards east
+/// (clockwise seen from above): with bearing 0, x is north and y east. The bearing is known only once fixes from
+/// places far enough apart pin it (bearing_known). Until then it is the map's own, as the drone's heading gave it at
+/// the map's first scan, which near steel can be far off; anchor_position holds whatever the bearing.
+public nonisolated struct Blueye_Protocol_SlamGeoreference: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// What placed the map.
+  public var source: Blueye_Protocol_SlamGeoreferenceSource = .unspecified
+
+  /// x of the map point the fixes place (m, in the map frame): where they were taken, weighted.
+  public var anchorX: Float = 0
+
+  /// y of the map point the fixes place (m, in the map frame).
+  public var anchorY: Float = 0
+
+  /// Where the anchor lies (WGS84).
+  public var anchorPosition: Blueye_Protocol_LatLongPosition {
+    get {_anchorPosition ?? Blueye_Protocol_LatLongPosition()}
+    set {_anchorPosition = newValue}
+  }
+  /// Returns true if `anchorPosition` has been explicitly set.
+  public var hasAnchorPosition: Bool {self._anchorPosition != nil}
+  /// Clears the value of `anchorPosition`. Subsequent reads from it will return its default value.
+  public mutating func clearAnchorPosition() {self._anchorPosition = nil}
+
+  /// Standard deviation of the anchor's position (m), along its least sure direction.
+  public var anchorStddev: Float = 0
+
+  /// Bearing of the map's x axis from true north (°, clockwise, 0 to 360).
+  public var bearing: Float = 0
+
+  /// Standard deviation of the bearing as the fixes give it (°). While bearing_known is false, it is how unsure the
+  /// fixes so far leave the bearing, up to 180° (fixes from one place say nothing of it); it is not the uncertainty
+  /// of bearing, which is then the map's own (from the drone's heading), and a client does not draw it as one.
+  public var bearingStddev: Float = 0
+
+  /// True if fixes pin the bearing; false: the map's own (the drone's heading at its start).
+  public var bearingKnown: Bool = false
+
+  /// Where the map's origin lies, at that bearing.
+  public var originPosition: Blueye_Protocol_LatLongPosition {
+    get {_originPosition ?? Blueye_Protocol_LatLongPosition()}
+    set {_originPosition = newValue}
+  }
+  /// Returns true if `originPosition` has been explicitly set.
+  public var hasOriginPosition: Bool {self._originPosition != nil}
+  /// Clears the value of `originPosition`. Subsequent reads from it will return its default value.
+  public mutating func clearOriginPosition() {self._originPosition = nil}
+
+  /// Standard deviation of the origin's position (m). With the bearing unknown, the anchor's plus the origin's
+  /// distance from it: any bearing may hold.
+  public var originStddev: Float = 0
+
+  /// Places the fixes were taken at (surfacings, each counted as one position).
+  public var places: UInt32 = 0
+
+  /// Fixes used.
+  public var fixes: UInt32 = 0
+
+  /// Host time of the newest fix used.
+  public var lastFixTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_lastFixTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_lastFixTime = newValue}
+  }
+  /// Returns true if `lastFixTime` has been explicitly set.
+  public var hasLastFixTime: Bool {self._lastFixTime != nil}
+  /// Clears the value of `lastFixTime`. Subsequent reads from it will return its default value.
+  public mutating func clearLastFixTime() {self._lastFixTime = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _anchorPosition: Blueye_Protocol_LatLongPosition? = nil
+  fileprivate var _originPosition: Blueye_Protocol_LatLongPosition? = nil
+  fileprivate var _lastFixTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
 /// How a SLAM map's frame lies in the world, for placing the map on a chart.
 ///
 /// The frame is right-handed: x along the heading reference, y to its right, z
 /// down (north-east-down with SLAM_HEADING_REFERENCE_DRONE_COMPASS). The origin is
 /// the platform's position at the map's first scan. The map's heading may drift
 /// from its reference over a dive: placing a map on a chart fits it to the drone's
-/// positions (PositionEstimateTel in the dive log).
-public nonisolated struct Blueye_Protocol_SlamMapFrame: Sendable {
+/// positions (PositionEstimateTel in the dive log), or takes georeference where
+/// position fixes have placed it.
+public nonisolated struct Blueye_Protocol_SlamMapFrame: @unchecked Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
   /// True if z is down and x and y level; false: the first scan's platform frame.
-  public var gravityAligned: Bool = false
+  public var gravityAligned: Bool {
+    get {_storage._gravityAligned}
+    set {_uniqueStorage()._gravityAligned = newValue}
+  }
 
   /// What x points along.
-  public var headingReference: Blueye_Protocol_SlamHeadingReference = .unspecified
+  public var headingReference: Blueye_Protocol_SlamHeadingReference {
+    get {_storage._headingReference}
+    set {_uniqueStorage()._headingReference = newValue}
+  }
 
   /// The magnetic declination the drone applied to its compass heading at the
   /// map's first scan (°, as MagneticDeclination.declination; 0 when it applied
@@ -1010,45 +1635,56 @@ public nonisolated struct Blueye_Protocol_SlamMapFrame: Sendable {
   /// declination less this east of true north (0 when the drone applied the
   /// place's). Unset when not known.
   public var magneticDeclination: Float {
-    get {_magneticDeclination ?? 0}
-    set {_magneticDeclination = newValue}
+    get {_storage._magneticDeclination ?? 0}
+    set {_uniqueStorage()._magneticDeclination = newValue}
   }
   /// Returns true if `magneticDeclination` has been explicitly set.
-  public var hasMagneticDeclination: Bool {self._magneticDeclination != nil}
+  public var hasMagneticDeclination: Bool {_storage._magneticDeclination != nil}
   /// Clears the value of `magneticDeclination`. Subsequent reads from it will return its default value.
-  public mutating func clearMagneticDeclination() {self._magneticDeclination = nil}
+  public mutating func clearMagneticDeclination() {_uniqueStorage()._magneticDeclination = nil}
 
   /// Depth of the origin below the surface (m), for a gravity-aligned map: a point
   /// at z in the map is at depth origin_depth + z. Unset without a depth.
   public var originDepth: Float {
-    get {_originDepth ?? 0}
-    set {_originDepth = newValue}
+    get {_storage._originDepth ?? 0}
+    set {_uniqueStorage()._originDepth = newValue}
   }
   /// Returns true if `originDepth` has been explicitly set.
-  public var hasOriginDepth: Bool {self._originDepth != nil}
+  public var hasOriginDepth: Bool {_storage._originDepth != nil}
   /// Clears the value of `originDepth`. Subsequent reads from it will return its default value.
-  public mutating func clearOriginDepth() {self._originDepth = nil}
+  public mutating func clearOriginDepth() {_uniqueStorage()._originDepth = nil}
 
   /// Host time of the map's first scan (its first keyframe's).
   public var startTime: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {_startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_startTime = newValue}
+    get {_storage._startTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._startTime = newValue}
   }
   /// Returns true if `startTime` has been explicitly set.
-  public var hasStartTime: Bool {self._startTime != nil}
+  public var hasStartTime: Bool {_storage._startTime != nil}
   /// Clears the value of `startTime`. Subsequent reads from it will return its default value.
-  public mutating func clearStartTime() {self._startTime = nil}
+  public mutating func clearStartTime() {_uniqueStorage()._startTime = nil}
 
   /// What the map's poses are the poses of.
-  public var platform: Blueye_Protocol_SlamPlatform = .unspecified
+  public var platform: Blueye_Protocol_SlamPlatform {
+    get {_storage._platform}
+    set {_uniqueStorage()._platform = newValue}
+  }
+
+  /// Where the map lies on the Earth, once position fixes have placed it; unset without.
+  public var georeference: Blueye_Protocol_SlamGeoreference {
+    get {_storage._georeference ?? Blueye_Protocol_SlamGeoreference()}
+    set {_uniqueStorage()._georeference = newValue}
+  }
+  /// Returns true if `georeference` has been explicitly set.
+  public var hasGeoreference: Bool {_storage._georeference != nil}
+  /// Clears the value of `georeference`. Subsequent reads from it will return its default value.
+  public mutating func clearGeoreference() {_uniqueStorage()._georeference = nil}
 
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
-  fileprivate var _magneticDeclination: Float? = nil
-  fileprivate var _originDepth: Float? = nil
-  fileprivate var _startTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 /// The whole SLAM map, or a part of it.
@@ -1063,7 +1699,7 @@ public nonisolated struct Blueye_Protocol_SlamMapFrame: Sendable {
 /// a later part has (proto3 does not tell a field set to its default from an unset
 /// one, so a client could not tell which part sets it).
 /// Which part carries which repeated values is up to the SLAM, but a submap is
-/// never split: each comes whole, in one part.
+/// never split: each comes whole, in one part, with all its points or its raster.
 public nonisolated struct Blueye_Protocol_SlamMap: Sendable {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1177,6 +1813,371 @@ public nonisolated struct Blueye_Protocol_SlamScan: @unchecked Sendable {
   fileprivate var _storage = _StorageClass.defaultInstance
 }
 
+/// A saved map, in brief: the first record of a map file
+/// (<recording>_map.sbez: this, then the map as SlamMapTel parts, its rasters
+/// deflated, which a client's file may follow with SlamMapUpdateTel), so that a
+/// client lists maps and shows them small without reading them whole. A SLAM
+/// that can localize in a base map writes one beside each of its recordings;
+/// a client makes one of a recording it has (a file on the pilot's device) and
+/// puts it in the drone's media folder, where the SLAM loads it as its own. A
+/// map file is written under a name ending in .part.sbez and renamed once
+/// whole: a reader skips such names.
+public nonisolated struct Blueye_Protocol_SlamMapSummary: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// File name of the recording the map ends (.sbez), without its folder.
+  public var recording: String {
+    get {_storage._recording}
+    set {_uniqueStorage()._recording = newValue}
+  }
+
+  /// The map's id in that recording.
+  public var mapID: UInt32 {
+    get {_storage._mapID}
+    set {_uniqueStorage()._mapID = newValue}
+  }
+
+  /// How the map's frame lies in the world; start_time is its first scan's.
+  public var frame: Blueye_Protocol_SlamMapFrame {
+    get {_storage._frame ?? Blueye_Protocol_SlamMapFrame()}
+    set {_uniqueStorage()._frame = newValue}
+  }
+  /// Returns true if `frame` has been explicitly set.
+  public var hasFrame: Bool {_storage._frame != nil}
+  /// Clears the value of `frame`. Subsequent reads from it will return its default value.
+  public mutating func clearFrame() {_uniqueStorage()._frame = nil}
+
+  /// Host time of the map's last scan (in a client's file, its last record).
+  public var endTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._endTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._endTime = newValue}
+  }
+  /// Returns true if `endTime` has been explicitly set.
+  public var hasEndTime: Bool {_storage._endTime != nil}
+  /// Clears the value of `endTime`. Subsequent reads from it will return its default value.
+  public mutating func clearEndTime() {_uniqueStorage()._endTime = nil}
+
+  /// Kind of sensor that made the map.
+  public var sensorType: Blueye_Protocol_SlamSensorType {
+    get {_storage._sensorType}
+    set {_uniqueStorage()._sensorType = newValue}
+  }
+
+  /// Keyframes in the map.
+  public var keyframeCount: UInt32 {
+    get {_storage._keyframeCount}
+    set {_uniqueStorage()._keyframeCount = newValue}
+  }
+
+  /// What the map's content covers in its frame (m), along x and along y.
+  public var minX: Float {
+    get {_storage._minX}
+    set {_uniqueStorage()._minX = newValue}
+  }
+
+  public var maxX: Float {
+    get {_storage._maxX}
+    set {_uniqueStorage()._maxX = newValue}
+  }
+
+  public var minY: Float {
+    get {_storage._minY}
+    set {_uniqueStorage()._minY = newValue}
+  }
+
+  public var maxY: Float {
+    get {_storage._maxY}
+    set {_uniqueStorage()._maxY = newValue}
+  }
+
+  /// The dive log the recording belongs with (DroneInfo.log_name), when known.
+  public var logName: String {
+    get {_storage._logName}
+    set {_uniqueStorage()._logName = newValue}
+  }
+
+  /// The map's mosaic, coarse (at most 256 pixels a side), its origin in the map's frame: for a list to show. Unset
+  /// when the client that made the file did not draw one. A client's file (uploaded) may break the bound, so a
+  /// reader checks it and treats a larger preview as absent.
+  public var preview: Blueye_Protocol_SlamRaster {
+    get {_storage._preview ?? Blueye_Protocol_SlamRaster()}
+    set {_uniqueStorage()._preview = newValue}
+  }
+  /// Returns true if `preview` has been explicitly set.
+  public var hasPreview: Bool {_storage._preview != nil}
+  /// Clears the value of `preview`. Subsequent reads from it will return its default value.
+  public mutating func clearPreview() {_uniqueStorage()._preview = nil}
+
+  /// Made by a client from a recording it had, not by the SLAM beside its own.
+  public var uploaded: Bool {
+    get {_storage._uploaded}
+    set {_uniqueStorage()._uploaded = newValue}
+  }
+
+  /// Where the drone was at the map's first scan, as its own position estimate had it
+  /// (PositionEstimate.global_position), or else where it was when the estimate was first valid
+  /// after that: a rough place of the map on the Earth, for a list to tell the maps nearby.
+  /// Unset when the estimate was not valid while the map was made.
+  public var startPosition: Blueye_Protocol_LatLongPosition {
+    get {_storage._startPosition ?? Blueye_Protocol_LatLongPosition()}
+    set {_uniqueStorage()._startPosition = newValue}
+  }
+  /// Returns true if `startPosition` has been explicitly set.
+  public var hasStartPosition: Bool {_storage._startPosition != nil}
+  /// Clears the value of `startPosition`. Subsequent reads from it will return its default value.
+  public mutating func clearStartPosition() {_uniqueStorage()._startPosition = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// The SLAM's base map, and where finding its map in it stands
+/// (SlamStatusTel.base_map, SetSlamBaseMapRep). Set only by a SLAM that can
+/// localize in a base map: unset, a client offers none.
+public nonisolated struct Blueye_Protocol_SlamBaseMapState: @unchecked Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// One more at each change, but for what a search updates as it goes (progress, score, margin, overlap,
+  /// base_map_pose, last_match_time): of this and of a reply, the one with the higher revision is the newer, and
+  /// of two with the same, the later. It starts at the SLAM's start time (in milliseconds), so a SLAM started again
+  /// is newer still.
+  public var revision: UInt64 {
+    get {_storage._revision}
+    set {_uniqueStorage()._revision = newValue}
+  }
+
+  /// What this SLAM takes; a client offers no other.
+  public var actions: [Blueye_Protocol_SlamBaseMapAction] {
+    get {_storage._actions}
+    set {_uniqueStorage()._actions = newValue}
+  }
+
+  /// Where it stands.
+  public var stage: Blueye_Protocol_SlamBaseMapStage {
+    get {_storage._stage}
+    set {_uniqueStorage()._stage = newValue}
+  }
+
+  /// The base map's file (.sbez) in the drone's media folder, without the folder.
+  public var name: String {
+    get {_storage._name}
+    set {_uniqueStorage()._name = newValue}
+  }
+
+  /// Where the file is.
+  public var storageLocation: Blueye_Protocol_StorageLocation {
+    get {_storage._storageLocation}
+    set {_uniqueStorage()._storageLocation = newValue}
+  }
+
+  /// The load, a new one each time a base map is loaded (0: none yet). A Clear keeps it: a Clear naming it again is
+  /// taken, and a Hint after it is refused with SLAM_REQUEST_ERROR_NO_BASE_MAP, whatever load it names.
+  public var loadID: UInt32 {
+    get {_storage._loadID}
+    set {_uniqueStorage()._loadID = newValue}
+  }
+
+  /// Which map the file holds (SlamMapSummary): its id in its recording, and its first scan's time. A client draws
+  /// the file it read only when they agree.
+  public var baseMapID: UInt32 {
+    get {_storage._baseMapID}
+    set {_uniqueStorage()._baseMapID = newValue}
+  }
+
+  public var baseMapStartTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._baseMapStartTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._baseMapStartTime = newValue}
+  }
+  /// Returns true if `baseMapStartTime` has been explicitly set.
+  public var hasBaseMapStartTime: Bool {_storage._baseMapStartTime != nil}
+  /// Clears the value of `baseMapStartTime`. Subsequent reads from it will return its default value.
+  public mutating func clearBaseMapStartTime() {_uniqueStorage()._baseMapStartTime = nil}
+
+  /// SWEEPING: how much of the sweep a search needs is there, from 0 to 1.
+  public var progress: Float {
+    get {_storage._progress}
+    set {_uniqueStorage()._progress = newValue}
+  }
+
+  /// SEARCHING: why the last search took no place.
+  public var miss: Blueye_Protocol_SlamBaseMapMiss {
+    get {_storage._miss}
+    set {_uniqueStorage()._miss = newValue}
+  }
+
+  /// The SLAM map base_map_pose is in (SlamPoseEstimate.map_id).
+  public var mapID: UInt32 {
+    get {_storage._mapID}
+    set {_uniqueStorage()._mapID = newValue}
+  }
+
+  /// FOUND: the base map's frame in that map's frame, as the SLAM's back end has it: a point p of the base map is
+  /// at base_map_pose times p in the map.
+  public var baseMapPose: Blueye_Protocol_SlamPose {
+    get {_storage._baseMapPose ?? Blueye_Protocol_SlamPose()}
+    set {_uniqueStorage()._baseMapPose = newValue}
+  }
+  /// Returns true if `baseMapPose` has been explicitly set.
+  public var hasBaseMapPose: Bool {_storage._baseMapPose != nil}
+  /// Clears the value of `baseMapPose`. Subsequent reads from it will return its default value.
+  public mutating func clearBaseMapPose() {_uniqueStorage()._baseMapPose = nil}
+
+  /// The place found (FOUND), or passed (CANDIDATE): a new one each, for SlamBaseMapReject. An id is never
+  /// repeated while the SLAM runs, whatever base maps it loads.
+  public var fixID: UInt32 {
+    get {_storage._fixID}
+    set {_uniqueStorage()._fixID = newValue}
+  }
+
+  /// FOUND: the matches that keep it.
+  public var matches: UInt32 {
+    get {_storage._matches}
+    set {_uniqueStorage()._matches = newValue}
+  }
+
+  /// FOUND: host time of the scan the last match was made at.
+  public var lastMatchTime: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {_storage._lastMatchTime ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._lastMatchTime = newValue}
+  }
+  /// Returns true if `lastMatchTime` has been explicitly set.
+  public var hasLastMatchTime: Bool {_storage._lastMatchTime != nil}
+  /// Clears the value of `lastMatchTime`. Subsequent reads from it will return its default value.
+  public mutating func clearLastMatchTime() {_uniqueStorage()._lastMatchTime = nil}
+
+  /// The last search's best place: its score (from 0, nothing alike, to 1), how far it stands above the next
+  /// place's (margin), and the share of the sweep that lies on the base map there (overlap). A place is taken
+  /// only with the margin and the overlap the SLAM requires.
+  public var score: Float {
+    get {_storage._score}
+    set {_uniqueStorage()._score = newValue}
+  }
+
+  public var margin: Float {
+    get {_storage._margin}
+    set {_uniqueStorage()._margin = newValue}
+  }
+
+  public var overlap: Float {
+    get {_storage._overlap}
+    set {_uniqueStorage()._overlap = newValue}
+  }
+
+  /// The searches look where a hint says (SlamBaseMapHint).
+  public var hinted: Bool {
+    get {_storage._hinted}
+    set {_uniqueStorage()._hinted = newValue}
+  }
+
+  /// FAILED: why.
+  public var error: Blueye_Protocol_SlamRequestError {
+    get {_storage._error}
+    set {_uniqueStorage()._error = newValue}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// Load a base map (SetSlamBaseMapReq): a file in the drone's media folder,
+/// in place of any loaded before. The reply comes at once; the status follows
+/// the load (LOADING, then SWEEPING or FAILED). A map of this dive is searched
+/// in a window around its heading (both maps are north up, by a compass that
+/// drifts a few degrees between them); one of another dive at every heading.
+public nonisolated struct Blueye_Protocol_SlamBaseMapLoad: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The file (.sbez), without a folder: a recording, or its map file (<recording>_map.sbez).
+  public var name: String = String()
+
+  /// Where it is.
+  public var storageLocation: Blueye_Protocol_StorageLocation = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Take the base map away (SetSlamBaseMapReq): the map goes back to where its
+/// own scans put it.
+public nonisolated struct Blueye_Protocol_SlamBaseMapClear: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The load to clear. It must be the current one (SlamBaseMapState.load_id), else the request is refused with
+  /// SLAM_REQUEST_ERROR_OTHER_BASE_MAP. 0 is the current one only before any base map was loaded: once one was,
+  /// a clear with 0 is refused.
+  public var loadID: UInt32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// The place found (or passed) is wrong (SetSlamBaseMapReq): it is dropped,
+/// the map goes back to where its own scans put it, and the search goes on
+/// without that place or one near it.
+public nonisolated struct Blueye_Protocol_SlamBaseMapReject: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The place (SlamBaseMapState.fix_id): only if it is still the current one. A fix id is never repeated while
+  /// the SLAM runs, so a late reject drops no place found since, in this load or another.
+  public var fixID: UInt32 = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+}
+
+/// Where the drone is in the base map, roughly (SetSlamBaseMapReq): until
+/// found, a place is taken only within radius of it, and only while no place
+/// outside scores better by the margin a place needs (else the hint is
+/// dropped: SLAM_BASE_MAP_MISS_OUTSIDE_HINT). Radius 0 drops the hint.
+public nonisolated struct Blueye_Protocol_SlamBaseMapHint: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The load it is for. It must be the current one (SlamBaseMapState.load_id), else the request is refused with
+  /// SLAM_REQUEST_ERROR_OTHER_BASE_MAP; once a base map was loaded, a hint with 0 is refused. A hint also needs a
+  /// base map loaded, else SLAM_REQUEST_ERROR_NO_BASE_MAP.
+  public var loadID: UInt32 = 0
+
+  /// The drone's position in the base map's frame (m; z is not used).
+  public var position: Blueye_Protocol_Vector3 {
+    get {_position ?? Blueye_Protocol_Vector3()}
+    set {_position = newValue}
+  }
+  /// Returns true if `position` has been explicitly set.
+  public var hasPosition: Bool {self._position != nil}
+  /// Clears the value of `position`. Subsequent reads from it will return its default value.
+  public mutating func clearPosition() {self._position = nil}
+
+  /// How far from position it may be (m).
+  public var radius: Float = 0
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _position: Blueye_Protocol_Vector3? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "blueye.protocol"
@@ -1186,7 +2187,7 @@ nonisolated extension Blueye_Protocol_SlamState: SwiftProtobuf._ProtoNameProvidi
 }
 
 nonisolated extension Blueye_Protocol_SlamSensorType: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_SENSOR_TYPE_UNSPECIFIED\0\u{1}SLAM_SENSOR_TYPE_SONAR_3D\0\u{1}SLAM_SENSOR_TYPE_STEREO_CAMERA\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_SENSOR_TYPE_UNSPECIFIED\0\u{1}SLAM_SENSOR_TYPE_SONAR_3D\0\u{1}SLAM_SENSOR_TYPE_STEREO_CAMERA\0\u{1}SLAM_SENSOR_TYPE_MULTIBEAM_2D\0")
 }
 
 nonisolated extension Blueye_Protocol_SlamPlatform: SwiftProtobuf._ProtoNameProviding {
@@ -1197,16 +2198,44 @@ nonisolated extension Blueye_Protocol_Sonar3dFrequencyMode: SwiftProtobuf._Proto
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SONAR_3D_FREQUENCY_MODE_UNSPECIFIED\0\u{1}SONAR_3D_FREQUENCY_MODE_LOW\0\u{1}SONAR_3D_FREQUENCY_MODE_HIGH\0")
 }
 
+nonisolated extension Blueye_Protocol_SlamMultibeamMode: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_MULTIBEAM_MODE_UNSPECIFIED\0\u{1}SLAM_MULTIBEAM_MODE_AUTO\0\u{1}SLAM_MULTIBEAM_MODE_SEABED\0\u{1}SLAM_MULTIBEAM_MODE_STRUCTURE\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamRasterFormat: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_RASTER_FORMAT_UNSPECIFIED\0\u{1}SLAM_RASTER_FORMAT_UINT8\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamRasterValue: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_RASTER_VALUE_UNSPECIFIED\0\u{1}SLAM_RASTER_VALUE_ECHO\0")
+}
+
 nonisolated extension Blueye_Protocol_SlamRequestError: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_REQUEST_ERROR_UNSPECIFIED\0\u{1}SLAM_REQUEST_ERROR_NOT_READABLE\0\u{1}SLAM_REQUEST_ERROR_OTHER_MAP\0\u{1}SLAM_REQUEST_ERROR_NO_SUCH_SENSOR\0\u{1}SLAM_REQUEST_ERROR_SENSOR\0\u{1}SLAM_REQUEST_ERROR_BUSY\0\u{1}SLAM_REQUEST_ERROR_NOT_MAPPING\0\u{1}SLAM_REQUEST_ERROR_STORAGE\0\u{1}SLAM_REQUEST_ERROR_NOT_SUPPORTED\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_REQUEST_ERROR_UNSPECIFIED\0\u{1}SLAM_REQUEST_ERROR_NOT_READABLE\0\u{1}SLAM_REQUEST_ERROR_OTHER_MAP\0\u{1}SLAM_REQUEST_ERROR_NO_SUCH_SENSOR\0\u{1}SLAM_REQUEST_ERROR_SENSOR\0\u{1}SLAM_REQUEST_ERROR_BUSY\0\u{1}SLAM_REQUEST_ERROR_NOT_MAPPING\0\u{1}SLAM_REQUEST_ERROR_STORAGE\0\u{1}SLAM_REQUEST_ERROR_NOT_SUPPORTED\0\u{1}SLAM_REQUEST_ERROR_NO_BASE_MAP\0\u{1}SLAM_REQUEST_ERROR_BASE_MAP_UNREADABLE\0\u{1}SLAM_REQUEST_ERROR_OTHER_BASE_MAP\0\u{1}SLAM_REQUEST_ERROR_OTHER_FIX\0")
 }
 
 nonisolated extension Blueye_Protocol_SlamOrientationSource: SwiftProtobuf._ProtoNameProviding {
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_ORIENTATION_SOURCE_UNSPECIFIED\0\u{1}SLAM_ORIENTATION_SOURCE_SENSOR_IMU\0\u{1}SLAM_ORIENTATION_SOURCE_DRONE_ATTITUDE\0\u{1}SLAM_ORIENTATION_SOURCE_DRONE_GYRO\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_ORIENTATION_SOURCE_UNSPECIFIED\0\u{1}SLAM_ORIENTATION_SOURCE_SENSOR_IMU\0\u{1}SLAM_ORIENTATION_SOURCE_DRONE_ATTITUDE\0\u{1}SLAM_ORIENTATION_SOURCE_DRONE_GYRO\0\u{1}SLAM_ORIENTATION_SOURCE_DRONE_ESTIMATE\0")
 }
 
 nonisolated extension Blueye_Protocol_SlamHeadingReference: SwiftProtobuf._ProtoNameProviding {
   public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_HEADING_REFERENCE_UNSPECIFIED\0\u{1}SLAM_HEADING_REFERENCE_FIRST_SCAN\0\u{1}SLAM_HEADING_REFERENCE_DRONE_COMPASS\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamGeoreferenceSource: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_GEOREFERENCE_SOURCE_UNSPECIFIED\0\u{1}SLAM_GEOREFERENCE_SOURCE_GNSS\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapStage: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_BASE_MAP_STAGE_UNSPECIFIED\0\u{1}SLAM_BASE_MAP_STAGE_LOADING\0\u{1}SLAM_BASE_MAP_STAGE_SWEEPING\0\u{1}SLAM_BASE_MAP_STAGE_SEARCHING\0\u{1}SLAM_BASE_MAP_STAGE_CANDIDATE\0\u{1}SLAM_BASE_MAP_STAGE_FOUND\0\u{1}SLAM_BASE_MAP_STAGE_FAILED\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapMiss: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_BASE_MAP_MISS_UNSPECIFIED\0\u{1}SLAM_BASE_MAP_MISS_NO_MATCH\0\u{1}SLAM_BASE_MAP_MISS_OFF_MAP\0\u{1}SLAM_BASE_MAP_MISS_AMBIGUOUS\0\u{1}SLAM_BASE_MAP_MISS_REJECTED\0\u{1}SLAM_BASE_MAP_MISS_WEAK\0\u{1}SLAM_BASE_MAP_MISS_OUTSIDE_HINT\0")
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapAction: SwiftProtobuf._ProtoNameProviding {
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{2}\0SLAM_BASE_MAP_ACTION_UNSPECIFIED\0\u{1}SLAM_BASE_MAP_ACTION_LOAD\0\u{1}SLAM_BASE_MAP_ACTION_CLEAR\0\u{1}SLAM_BASE_MAP_ACTION_REJECT\0\u{1}SLAM_BASE_MAP_ACTION_HINT\0")
 }
 
 nonisolated extension Blueye_Protocol_SlamSensor: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
@@ -1359,9 +2388,39 @@ nonisolated extension Blueye_Protocol_SlamSonar3dSettings: SwiftProtobuf.Message
   }
 }
 
+nonisolated extension Blueye_Protocol_SlamMultibeamSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamMultibeamSettings"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}mode\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.mode) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.mode != .unspecified {
+      try visitor.visitSingularEnumField(value: self.mode, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamMultibeamSettings, rhs: Blueye_Protocol_SlamMultibeamSettings) -> Bool {
+    if lhs.mode != rhs.mode {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 nonisolated extension Blueye_Protocol_SlamSensorSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SlamSensorSettings"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}sonar_3d\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}sonar_3d\0\u{1}multibeam\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1382,6 +2441,19 @@ nonisolated extension Blueye_Protocol_SlamSensorSettings: SwiftProtobuf.Message,
           self.settings = .sonar3D(v)
         }
       }()
+      case 2: try {
+        var v: Blueye_Protocol_SlamMultibeamSettings?
+        var hadOneofValue = false
+        if let current = self.settings {
+          hadOneofValue = true
+          if case .multibeam(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.settings = .multibeam(v)
+        }
+      }()
       default: break
       }
     }
@@ -1392,9 +2464,17 @@ nonisolated extension Blueye_Protocol_SlamSensorSettings: SwiftProtobuf.Message,
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    try { if case .sonar3D(let v)? = self.settings {
+    switch self.settings {
+    case .sonar3D?: try {
+      guard case .sonar3D(let v)? = self.settings else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
+    }()
+    case .multibeam?: try {
+      guard case .multibeam(let v)? = self.settings else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case nil: break
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1801,9 +2881,9 @@ nonisolated extension Blueye_Protocol_SlamKeyframe: SwiftProtobuf.Message, Swift
   }
 }
 
-nonisolated extension Blueye_Protocol_SlamSubmap: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SlamSubmap"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}submap_id\0\u{3}anchor_keyframe_id\0\u{3}sensor_id\0\u{1}points\0\u{1}replace\0")
+nonisolated extension Blueye_Protocol_SlamRaster: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamRaster"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}origin\0\u{1}rows\0\u{1}columns\0\u{1}resolution\0\u{3}pixel_format\0\u{1}value\0\u{3}pixels_deflated\0\u{3}coverage_deflated\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -1811,23 +2891,14 @@ nonisolated extension Blueye_Protocol_SlamSubmap: SwiftProtobuf.Message, SwiftPr
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.submapID) }()
-      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.anchorKeyframeID) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.sensorID) }()
-      case 4: try {
-        var v: Blueye_Protocol_PointCloud?
-        var hadOneofValue = false
-        if let current = self.content {
-          hadOneofValue = true
-          if case .points(let m) = current {v = m}
-        }
-        try decoder.decodeSingularMessageField(value: &v)
-        if let v = v {
-          if hadOneofValue {try decoder.handleConflictingOneOf()}
-          self.content = .points(v)
-        }
-      }()
-      case 5: try { try decoder.decodeSingularBoolField(value: &self.replace) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._origin) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.rows) }()
+      case 3: try { try decoder.decodeSingularUInt32Field(value: &self.columns) }()
+      case 4: try { try decoder.decodeSingularFloatField(value: &self.resolution) }()
+      case 5: try { try decoder.decodeSingularEnumField(value: &self.pixelFormat) }()
+      case 6: try { try decoder.decodeSingularEnumField(value: &self.value) }()
+      case 7: try { try decoder.decodeSingularBytesField(value: &self.pixelsDeflated) }()
+      case 8: try { try decoder.decodeSingularBytesField(value: &self.coverageDeflated) }()
       default: break
       }
     }
@@ -1838,30 +2909,168 @@ nonisolated extension Blueye_Protocol_SlamSubmap: SwiftProtobuf.Message, SwiftPr
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if self.submapID != 0 {
-      try visitor.visitSingularUInt32Field(value: self.submapID, fieldNumber: 1)
-    }
-    if self.anchorKeyframeID != 0 {
-      try visitor.visitSingularUInt32Field(value: self.anchorKeyframeID, fieldNumber: 2)
-    }
-    if !self.sensorID.isEmpty {
-      try visitor.visitSingularStringField(value: self.sensorID, fieldNumber: 3)
-    }
-    try { if case .points(let v)? = self.content {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    try { if let v = self._origin {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
-    if self.replace != false {
-      try visitor.visitSingularBoolField(value: self.replace, fieldNumber: 5)
+    if self.rows != 0 {
+      try visitor.visitSingularUInt32Field(value: self.rows, fieldNumber: 2)
+    }
+    if self.columns != 0 {
+      try visitor.visitSingularUInt32Field(value: self.columns, fieldNumber: 3)
+    }
+    if self.resolution.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.resolution, fieldNumber: 4)
+    }
+    if self.pixelFormat != .unspecified {
+      try visitor.visitSingularEnumField(value: self.pixelFormat, fieldNumber: 5)
+    }
+    if self.value != .unspecified {
+      try visitor.visitSingularEnumField(value: self.value, fieldNumber: 6)
+    }
+    if !self.pixelsDeflated.isEmpty {
+      try visitor.visitSingularBytesField(value: self.pixelsDeflated, fieldNumber: 7)
+    }
+    if !self.coverageDeflated.isEmpty {
+      try visitor.visitSingularBytesField(value: self.coverageDeflated, fieldNumber: 8)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamRaster, rhs: Blueye_Protocol_SlamRaster) -> Bool {
+    if lhs._origin != rhs._origin {return false}
+    if lhs.rows != rhs.rows {return false}
+    if lhs.columns != rhs.columns {return false}
+    if lhs.resolution != rhs.resolution {return false}
+    if lhs.pixelFormat != rhs.pixelFormat {return false}
+    if lhs.value != rhs.value {return false}
+    if lhs.pixelsDeflated != rhs.pixelsDeflated {return false}
+    if lhs.coverageDeflated != rhs.coverageDeflated {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamSubmap: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamSubmap"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}submap_id\0\u{3}anchor_keyframe_id\0\u{3}sensor_id\0\u{1}points\0\u{1}replace\0\u{1}raster\0")
+
+  fileprivate class _StorageClass {
+    var _submapID: UInt32 = 0
+    var _anchorKeyframeID: UInt32 = 0
+    var _sensorID: String = String()
+    var _content: Blueye_Protocol_SlamSubmap.OneOf_Content?
+    var _replace: Bool = false
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _submapID = source._submapID
+      _anchorKeyframeID = source._anchorKeyframeID
+      _sensorID = source._sensorID
+      _content = source._content
+      _replace = source._replace
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularUInt32Field(value: &_storage._submapID) }()
+        case 2: try { try decoder.decodeSingularUInt32Field(value: &_storage._anchorKeyframeID) }()
+        case 3: try { try decoder.decodeSingularStringField(value: &_storage._sensorID) }()
+        case 4: try {
+          var v: Blueye_Protocol_PointCloud?
+          var hadOneofValue = false
+          if let current = _storage._content {
+            hadOneofValue = true
+            if case .points(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {
+            if hadOneofValue {try decoder.handleConflictingOneOf()}
+            _storage._content = .points(v)
+          }
+        }()
+        case 5: try { try decoder.decodeSingularBoolField(value: &_storage._replace) }()
+        case 6: try {
+          var v: Blueye_Protocol_SlamRaster?
+          var hadOneofValue = false
+          if let current = _storage._content {
+            hadOneofValue = true
+            if case .raster(let m) = current {v = m}
+          }
+          try decoder.decodeSingularMessageField(value: &v)
+          if let v = v {
+            if hadOneofValue {try decoder.handleConflictingOneOf()}
+            _storage._content = .raster(v)
+          }
+        }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if _storage._submapID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._submapID, fieldNumber: 1)
+      }
+      if _storage._anchorKeyframeID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._anchorKeyframeID, fieldNumber: 2)
+      }
+      if !_storage._sensorID.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._sensorID, fieldNumber: 3)
+      }
+      try { if case .points(let v)? = _storage._content {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+      } }()
+      if _storage._replace != false {
+        try visitor.visitSingularBoolField(value: _storage._replace, fieldNumber: 5)
+      }
+      try { if case .raster(let v)? = _storage._content {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Blueye_Protocol_SlamSubmap, rhs: Blueye_Protocol_SlamSubmap) -> Bool {
-    if lhs.submapID != rhs.submapID {return false}
-    if lhs.anchorKeyframeID != rhs.anchorKeyframeID {return false}
-    if lhs.sensorID != rhs.sensorID {return false}
-    if lhs.content != rhs.content {return false}
-    if lhs.replace != rhs.replace {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._submapID != rhs_storage._submapID {return false}
+        if _storage._anchorKeyframeID != rhs_storage._anchorKeyframeID {return false}
+        if _storage._sensorID != rhs_storage._sensorID {return false}
+        if _storage._content != rhs_storage._content {return false}
+        if _storage._replace != rhs_storage._replace {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2056,9 +3265,9 @@ nonisolated extension Blueye_Protocol_SlamAiding: SwiftProtobuf.Message, SwiftPr
   }
 }
 
-nonisolated extension Blueye_Protocol_SlamMapFrame: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  public static let protoMessageName: String = _protobuf_package + ".SlamMapFrame"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}gravity_aligned\0\u{3}heading_reference\0\u{3}magnetic_declination\0\u{3}origin_depth\0\u{3}start_time\0\u{1}platform\0")
+nonisolated extension Blueye_Protocol_SlamGeoreference: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamGeoreference"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}source\0\u{3}anchor_x\0\u{3}anchor_y\0\u{3}anchor_position\0\u{3}anchor_stddev\0\u{1}bearing\0\u{3}bearing_stddev\0\u{3}bearing_known\0\u{3}origin_position\0\u{3}origin_stddev\0\u{1}places\0\u{1}fixes\0\u{3}last_fix_time\0")
 
   public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
@@ -2066,12 +3275,19 @@ nonisolated extension Blueye_Protocol_SlamMapFrame: SwiftProtobuf.Message, Swift
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularBoolField(value: &self.gravityAligned) }()
-      case 2: try { try decoder.decodeSingularEnumField(value: &self.headingReference) }()
-      case 3: try { try decoder.decodeSingularFloatField(value: &self._magneticDeclination) }()
-      case 4: try { try decoder.decodeSingularFloatField(value: &self._originDepth) }()
-      case 5: try { try decoder.decodeSingularMessageField(value: &self._startTime) }()
-      case 6: try { try decoder.decodeSingularEnumField(value: &self.platform) }()
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.source) }()
+      case 2: try { try decoder.decodeSingularFloatField(value: &self.anchorX) }()
+      case 3: try { try decoder.decodeSingularFloatField(value: &self.anchorY) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._anchorPosition) }()
+      case 5: try { try decoder.decodeSingularFloatField(value: &self.anchorStddev) }()
+      case 6: try { try decoder.decodeSingularFloatField(value: &self.bearing) }()
+      case 7: try { try decoder.decodeSingularFloatField(value: &self.bearingStddev) }()
+      case 8: try { try decoder.decodeSingularBoolField(value: &self.bearingKnown) }()
+      case 9: try { try decoder.decodeSingularMessageField(value: &self._originPosition) }()
+      case 10: try { try decoder.decodeSingularFloatField(value: &self.originStddev) }()
+      case 11: try { try decoder.decodeSingularUInt32Field(value: &self.places) }()
+      case 12: try { try decoder.decodeSingularUInt32Field(value: &self.fixes) }()
+      case 13: try { try decoder.decodeSingularMessageField(value: &self._lastFixTime) }()
       default: break
       }
     }
@@ -2082,34 +3298,174 @@ nonisolated extension Blueye_Protocol_SlamMapFrame: SwiftProtobuf.Message, Swift
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if self.gravityAligned != false {
-      try visitor.visitSingularBoolField(value: self.gravityAligned, fieldNumber: 1)
+    if self.source != .unspecified {
+      try visitor.visitSingularEnumField(value: self.source, fieldNumber: 1)
     }
-    if self.headingReference != .unspecified {
-      try visitor.visitSingularEnumField(value: self.headingReference, fieldNumber: 2)
+    if self.anchorX.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.anchorX, fieldNumber: 2)
     }
-    try { if let v = self._magneticDeclination {
-      try visitor.visitSingularFloatField(value: v, fieldNumber: 3)
+    if self.anchorY.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.anchorY, fieldNumber: 3)
+    }
+    try { if let v = self._anchorPosition {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     } }()
-    try { if let v = self._originDepth {
-      try visitor.visitSingularFloatField(value: v, fieldNumber: 4)
+    if self.anchorStddev.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.anchorStddev, fieldNumber: 5)
+    }
+    if self.bearing.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.bearing, fieldNumber: 6)
+    }
+    if self.bearingStddev.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.bearingStddev, fieldNumber: 7)
+    }
+    if self.bearingKnown != false {
+      try visitor.visitSingularBoolField(value: self.bearingKnown, fieldNumber: 8)
+    }
+    try { if let v = self._originPosition {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
     } }()
-    try { if let v = self._startTime {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    if self.originStddev.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.originStddev, fieldNumber: 10)
+    }
+    if self.places != 0 {
+      try visitor.visitSingularUInt32Field(value: self.places, fieldNumber: 11)
+    }
+    if self.fixes != 0 {
+      try visitor.visitSingularUInt32Field(value: self.fixes, fieldNumber: 12)
+    }
+    try { if let v = self._lastFixTime {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
     } }()
-    if self.platform != .unspecified {
-      try visitor.visitSingularEnumField(value: self.platform, fieldNumber: 6)
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamGeoreference, rhs: Blueye_Protocol_SlamGeoreference) -> Bool {
+    if lhs.source != rhs.source {return false}
+    if lhs.anchorX != rhs.anchorX {return false}
+    if lhs.anchorY != rhs.anchorY {return false}
+    if lhs._anchorPosition != rhs._anchorPosition {return false}
+    if lhs.anchorStddev != rhs.anchorStddev {return false}
+    if lhs.bearing != rhs.bearing {return false}
+    if lhs.bearingStddev != rhs.bearingStddev {return false}
+    if lhs.bearingKnown != rhs.bearingKnown {return false}
+    if lhs._originPosition != rhs._originPosition {return false}
+    if lhs.originStddev != rhs.originStddev {return false}
+    if lhs.places != rhs.places {return false}
+    if lhs.fixes != rhs.fixes {return false}
+    if lhs._lastFixTime != rhs._lastFixTime {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamMapFrame: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamMapFrame"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}gravity_aligned\0\u{3}heading_reference\0\u{3}magnetic_declination\0\u{3}origin_depth\0\u{3}start_time\0\u{1}platform\0\u{1}georeference\0")
+
+  fileprivate class _StorageClass {
+    var _gravityAligned: Bool = false
+    var _headingReference: Blueye_Protocol_SlamHeadingReference = .unspecified
+    var _magneticDeclination: Float? = nil
+    var _originDepth: Float? = nil
+    var _startTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _platform: Blueye_Protocol_SlamPlatform = .unspecified
+    var _georeference: Blueye_Protocol_SlamGeoreference? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _gravityAligned = source._gravityAligned
+      _headingReference = source._headingReference
+      _magneticDeclination = source._magneticDeclination
+      _originDepth = source._originDepth
+      _startTime = source._startTime
+      _platform = source._platform
+      _georeference = source._georeference
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularBoolField(value: &_storage._gravityAligned) }()
+        case 2: try { try decoder.decodeSingularEnumField(value: &_storage._headingReference) }()
+        case 3: try { try decoder.decodeSingularFloatField(value: &_storage._magneticDeclination) }()
+        case 4: try { try decoder.decodeSingularFloatField(value: &_storage._originDepth) }()
+        case 5: try { try decoder.decodeSingularMessageField(value: &_storage._startTime) }()
+        case 6: try { try decoder.decodeSingularEnumField(value: &_storage._platform) }()
+        case 7: try { try decoder.decodeSingularMessageField(value: &_storage._georeference) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if _storage._gravityAligned != false {
+        try visitor.visitSingularBoolField(value: _storage._gravityAligned, fieldNumber: 1)
+      }
+      if _storage._headingReference != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._headingReference, fieldNumber: 2)
+      }
+      try { if let v = _storage._magneticDeclination {
+        try visitor.visitSingularFloatField(value: v, fieldNumber: 3)
+      } }()
+      try { if let v = _storage._originDepth {
+        try visitor.visitSingularFloatField(value: v, fieldNumber: 4)
+      } }()
+      try { if let v = _storage._startTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+      } }()
+      if _storage._platform != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._platform, fieldNumber: 6)
+      }
+      try { if let v = _storage._georeference {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   public static func ==(lhs: Blueye_Protocol_SlamMapFrame, rhs: Blueye_Protocol_SlamMapFrame) -> Bool {
-    if lhs.gravityAligned != rhs.gravityAligned {return false}
-    if lhs.headingReference != rhs.headingReference {return false}
-    if lhs._magneticDeclination != rhs._magneticDeclination {return false}
-    if lhs._originDepth != rhs._originDepth {return false}
-    if lhs._startTime != rhs._startTime {return false}
-    if lhs.platform != rhs.platform {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._gravityAligned != rhs_storage._gravityAligned {return false}
+        if _storage._headingReference != rhs_storage._headingReference {return false}
+        if _storage._magneticDeclination != rhs_storage._magneticDeclination {return false}
+        if _storage._originDepth != rhs_storage._originDepth {return false}
+        if _storage._startTime != rhs_storage._startTime {return false}
+        if _storage._platform != rhs_storage._platform {return false}
+        if _storage._georeference != rhs_storage._georeference {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2284,6 +3640,509 @@ nonisolated extension Blueye_Protocol_SlamScan: SwiftProtobuf.Message, SwiftProt
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamMapSummary: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamMapSummary"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}recording\0\u{3}map_id\0\u{1}frame\0\u{3}end_time\0\u{3}sensor_type\0\u{3}keyframe_count\0\u{3}min_x\0\u{3}max_x\0\u{3}min_y\0\u{3}max_y\0\u{3}log_name\0\u{1}preview\0\u{1}uploaded\0\u{3}start_position\0")
+
+  fileprivate class _StorageClass {
+    var _recording: String = String()
+    var _mapID: UInt32 = 0
+    var _frame: Blueye_Protocol_SlamMapFrame? = nil
+    var _endTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _sensorType: Blueye_Protocol_SlamSensorType = .unspecified
+    var _keyframeCount: UInt32 = 0
+    var _minX: Float = 0
+    var _maxX: Float = 0
+    var _minY: Float = 0
+    var _maxY: Float = 0
+    var _logName: String = String()
+    var _preview: Blueye_Protocol_SlamRaster? = nil
+    var _uploaded: Bool = false
+    var _startPosition: Blueye_Protocol_LatLongPosition? = nil
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _recording = source._recording
+      _mapID = source._mapID
+      _frame = source._frame
+      _endTime = source._endTime
+      _sensorType = source._sensorType
+      _keyframeCount = source._keyframeCount
+      _minX = source._minX
+      _maxX = source._maxX
+      _minY = source._minY
+      _maxY = source._maxY
+      _logName = source._logName
+      _preview = source._preview
+      _uploaded = source._uploaded
+      _startPosition = source._startPosition
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularStringField(value: &_storage._recording) }()
+        case 2: try { try decoder.decodeSingularUInt32Field(value: &_storage._mapID) }()
+        case 3: try { try decoder.decodeSingularMessageField(value: &_storage._frame) }()
+        case 4: try { try decoder.decodeSingularMessageField(value: &_storage._endTime) }()
+        case 5: try { try decoder.decodeSingularEnumField(value: &_storage._sensorType) }()
+        case 6: try { try decoder.decodeSingularUInt32Field(value: &_storage._keyframeCount) }()
+        case 7: try { try decoder.decodeSingularFloatField(value: &_storage._minX) }()
+        case 8: try { try decoder.decodeSingularFloatField(value: &_storage._maxX) }()
+        case 9: try { try decoder.decodeSingularFloatField(value: &_storage._minY) }()
+        case 10: try { try decoder.decodeSingularFloatField(value: &_storage._maxY) }()
+        case 11: try { try decoder.decodeSingularStringField(value: &_storage._logName) }()
+        case 12: try { try decoder.decodeSingularMessageField(value: &_storage._preview) }()
+        case 13: try { try decoder.decodeSingularBoolField(value: &_storage._uploaded) }()
+        case 14: try { try decoder.decodeSingularMessageField(value: &_storage._startPosition) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if !_storage._recording.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._recording, fieldNumber: 1)
+      }
+      if _storage._mapID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._mapID, fieldNumber: 2)
+      }
+      try { if let v = _storage._frame {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      } }()
+      try { if let v = _storage._endTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+      } }()
+      if _storage._sensorType != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._sensorType, fieldNumber: 5)
+      }
+      if _storage._keyframeCount != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._keyframeCount, fieldNumber: 6)
+      }
+      if _storage._minX.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._minX, fieldNumber: 7)
+      }
+      if _storage._maxX.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._maxX, fieldNumber: 8)
+      }
+      if _storage._minY.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._minY, fieldNumber: 9)
+      }
+      if _storage._maxY.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._maxY, fieldNumber: 10)
+      }
+      if !_storage._logName.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._logName, fieldNumber: 11)
+      }
+      try { if let v = _storage._preview {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+      } }()
+      if _storage._uploaded != false {
+        try visitor.visitSingularBoolField(value: _storage._uploaded, fieldNumber: 13)
+      }
+      try { if let v = _storage._startPosition {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
+      } }()
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamMapSummary, rhs: Blueye_Protocol_SlamMapSummary) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._recording != rhs_storage._recording {return false}
+        if _storage._mapID != rhs_storage._mapID {return false}
+        if _storage._frame != rhs_storage._frame {return false}
+        if _storage._endTime != rhs_storage._endTime {return false}
+        if _storage._sensorType != rhs_storage._sensorType {return false}
+        if _storage._keyframeCount != rhs_storage._keyframeCount {return false}
+        if _storage._minX != rhs_storage._minX {return false}
+        if _storage._maxX != rhs_storage._maxX {return false}
+        if _storage._minY != rhs_storage._minY {return false}
+        if _storage._maxY != rhs_storage._maxY {return false}
+        if _storage._logName != rhs_storage._logName {return false}
+        if _storage._preview != rhs_storage._preview {return false}
+        if _storage._uploaded != rhs_storage._uploaded {return false}
+        if _storage._startPosition != rhs_storage._startPosition {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapState"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}revision\0\u{1}actions\0\u{1}stage\0\u{1}name\0\u{3}storage_location\0\u{3}load_id\0\u{3}base_map_id\0\u{3}base_map_start_time\0\u{1}progress\0\u{1}miss\0\u{3}map_id\0\u{3}base_map_pose\0\u{3}fix_id\0\u{1}matches\0\u{3}last_match_time\0\u{1}score\0\u{1}margin\0\u{1}overlap\0\u{1}hinted\0\u{1}error\0")
+
+  fileprivate class _StorageClass {
+    var _revision: UInt64 = 0
+    var _actions: [Blueye_Protocol_SlamBaseMapAction] = []
+    var _stage: Blueye_Protocol_SlamBaseMapStage = .unspecified
+    var _name: String = String()
+    var _storageLocation: Blueye_Protocol_StorageLocation = .unspecified
+    var _loadID: UInt32 = 0
+    var _baseMapID: UInt32 = 0
+    var _baseMapStartTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _progress: Float = 0
+    var _miss: Blueye_Protocol_SlamBaseMapMiss = .unspecified
+    var _mapID: UInt32 = 0
+    var _baseMapPose: Blueye_Protocol_SlamPose? = nil
+    var _fixID: UInt32 = 0
+    var _matches: UInt32 = 0
+    var _lastMatchTime: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _score: Float = 0
+    var _margin: Float = 0
+    var _overlap: Float = 0
+    var _hinted: Bool = false
+    var _error: Blueye_Protocol_SlamRequestError = .unspecified
+
+      // This property is used as the initial default value for new instances of the type.
+      // The type itself is protecting the reference to its storage via CoW semantics.
+      // This will force a copy to be made of this reference when the first mutation occurs;
+      // hence, it is safe to mark this as `nonisolated(unsafe)`.
+      static nonisolated(unsafe) let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _revision = source._revision
+      _actions = source._actions
+      _stage = source._stage
+      _name = source._name
+      _storageLocation = source._storageLocation
+      _loadID = source._loadID
+      _baseMapID = source._baseMapID
+      _baseMapStartTime = source._baseMapStartTime
+      _progress = source._progress
+      _miss = source._miss
+      _mapID = source._mapID
+      _baseMapPose = source._baseMapPose
+      _fixID = source._fixID
+      _matches = source._matches
+      _lastMatchTime = source._lastMatchTime
+      _score = source._score
+      _margin = source._margin
+      _overlap = source._overlap
+      _hinted = source._hinted
+      _error = source._error
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularUInt64Field(value: &_storage._revision) }()
+        case 2: try { try decoder.decodeRepeatedEnumField(value: &_storage._actions) }()
+        case 3: try { try decoder.decodeSingularEnumField(value: &_storage._stage) }()
+        case 4: try { try decoder.decodeSingularStringField(value: &_storage._name) }()
+        case 5: try { try decoder.decodeSingularEnumField(value: &_storage._storageLocation) }()
+        case 6: try { try decoder.decodeSingularUInt32Field(value: &_storage._loadID) }()
+        case 7: try { try decoder.decodeSingularUInt32Field(value: &_storage._baseMapID) }()
+        case 8: try { try decoder.decodeSingularMessageField(value: &_storage._baseMapStartTime) }()
+        case 9: try { try decoder.decodeSingularFloatField(value: &_storage._progress) }()
+        case 10: try { try decoder.decodeSingularEnumField(value: &_storage._miss) }()
+        case 11: try { try decoder.decodeSingularUInt32Field(value: &_storage._mapID) }()
+        case 12: try { try decoder.decodeSingularMessageField(value: &_storage._baseMapPose) }()
+        case 13: try { try decoder.decodeSingularUInt32Field(value: &_storage._fixID) }()
+        case 14: try { try decoder.decodeSingularUInt32Field(value: &_storage._matches) }()
+        case 15: try { try decoder.decodeSingularMessageField(value: &_storage._lastMatchTime) }()
+        case 16: try { try decoder.decodeSingularFloatField(value: &_storage._score) }()
+        case 17: try { try decoder.decodeSingularFloatField(value: &_storage._margin) }()
+        case 18: try { try decoder.decodeSingularFloatField(value: &_storage._overlap) }()
+        case 19: try { try decoder.decodeSingularBoolField(value: &_storage._hinted) }()
+        case 20: try { try decoder.decodeSingularEnumField(value: &_storage._error) }()
+        default: break
+        }
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      if _storage._revision != 0 {
+        try visitor.visitSingularUInt64Field(value: _storage._revision, fieldNumber: 1)
+      }
+      if !_storage._actions.isEmpty {
+        try visitor.visitPackedEnumField(value: _storage._actions, fieldNumber: 2)
+      }
+      if _storage._stage != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._stage, fieldNumber: 3)
+      }
+      if !_storage._name.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._name, fieldNumber: 4)
+      }
+      if _storage._storageLocation != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._storageLocation, fieldNumber: 5)
+      }
+      if _storage._loadID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._loadID, fieldNumber: 6)
+      }
+      if _storage._baseMapID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._baseMapID, fieldNumber: 7)
+      }
+      try { if let v = _storage._baseMapStartTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+      } }()
+      if _storage._progress.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._progress, fieldNumber: 9)
+      }
+      if _storage._miss != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._miss, fieldNumber: 10)
+      }
+      if _storage._mapID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._mapID, fieldNumber: 11)
+      }
+      try { if let v = _storage._baseMapPose {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+      } }()
+      if _storage._fixID != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._fixID, fieldNumber: 13)
+      }
+      if _storage._matches != 0 {
+        try visitor.visitSingularUInt32Field(value: _storage._matches, fieldNumber: 14)
+      }
+      try { if let v = _storage._lastMatchTime {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 15)
+      } }()
+      if _storage._score.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._score, fieldNumber: 16)
+      }
+      if _storage._margin.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._margin, fieldNumber: 17)
+      }
+      if _storage._overlap.bitPattern != 0 {
+        try visitor.visitSingularFloatField(value: _storage._overlap, fieldNumber: 18)
+      }
+      if _storage._hinted != false {
+        try visitor.visitSingularBoolField(value: _storage._hinted, fieldNumber: 19)
+      }
+      if _storage._error != .unspecified {
+        try visitor.visitSingularEnumField(value: _storage._error, fieldNumber: 20)
+      }
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapState, rhs: Blueye_Protocol_SlamBaseMapState) -> Bool {
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._revision != rhs_storage._revision {return false}
+        if _storage._actions != rhs_storage._actions {return false}
+        if _storage._stage != rhs_storage._stage {return false}
+        if _storage._name != rhs_storage._name {return false}
+        if _storage._storageLocation != rhs_storage._storageLocation {return false}
+        if _storage._loadID != rhs_storage._loadID {return false}
+        if _storage._baseMapID != rhs_storage._baseMapID {return false}
+        if _storage._baseMapStartTime != rhs_storage._baseMapStartTime {return false}
+        if _storage._progress != rhs_storage._progress {return false}
+        if _storage._miss != rhs_storage._miss {return false}
+        if _storage._mapID != rhs_storage._mapID {return false}
+        if _storage._baseMapPose != rhs_storage._baseMapPose {return false}
+        if _storage._fixID != rhs_storage._fixID {return false}
+        if _storage._matches != rhs_storage._matches {return false}
+        if _storage._lastMatchTime != rhs_storage._lastMatchTime {return false}
+        if _storage._score != rhs_storage._score {return false}
+        if _storage._margin != rhs_storage._margin {return false}
+        if _storage._overlap != rhs_storage._overlap {return false}
+        if _storage._hinted != rhs_storage._hinted {return false}
+        if _storage._error != rhs_storage._error {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapLoad: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapLoad"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}name\0\u{3}storage_location\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.storageLocation) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 1)
+    }
+    if self.storageLocation != .unspecified {
+      try visitor.visitSingularEnumField(value: self.storageLocation, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapLoad, rhs: Blueye_Protocol_SlamBaseMapLoad) -> Bool {
+    if lhs.name != rhs.name {return false}
+    if lhs.storageLocation != rhs.storageLocation {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapClear: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapClear"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}load_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.loadID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.loadID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.loadID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapClear, rhs: Blueye_Protocol_SlamBaseMapClear) -> Bool {
+    if lhs.loadID != rhs.loadID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapReject: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapReject"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}fix_id\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.fixID) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.fixID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.fixID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapReject, rhs: Blueye_Protocol_SlamBaseMapReject) -> Bool {
+    if lhs.fixID != rhs.fixID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapHint: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapHint"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}load_id\0\u{1}position\0\u{1}radius\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.loadID) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._position) }()
+      case 3: try { try decoder.decodeSingularFloatField(value: &self.radius) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.loadID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.loadID, fieldNumber: 1)
+    }
+    try { if let v = self._position {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.radius.bitPattern != 0 {
+      try visitor.visitSingularFloatField(value: self.radius, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapHint, rhs: Blueye_Protocol_SlamBaseMapHint) -> Bool {
+    if lhs.loadID != rhs.loadID {return false}
+    if lhs._position != rhs._position {return false}
+    if lhs.radius != rhs.radius {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

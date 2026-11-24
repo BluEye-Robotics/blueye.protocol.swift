@@ -1863,7 +1863,7 @@ public nonisolated struct Blueye_Protocol_SlamPoseTel: Sendable {
   fileprivate var _estimate: Blueye_Protocol_SlamPoseEstimate? = nil
 }
 
-/// A change to the SLAM map: new keyframes and points, or a corrected trajectory.
+/// A change to the SLAM map: new keyframes and submap content, or a corrected trajectory.
 ///
 /// Published on the SLAM publisher. A client applies the updates that follow the
 /// map it holds (SlamMapTel); one it missed it asks for again (GetSlamMapReq).
@@ -2025,11 +2025,54 @@ public nonisolated struct Blueye_Protocol_SlamStatusTel: @unchecked Sendable {
     set {_uniqueStorage()._backendFailed = newValue}
   }
 
+  /// The base map and where finding the map in it stands; unset when the SLAM cannot localize in one. Also
+  /// published when it changes.
+  public var baseMap: Blueye_Protocol_SlamBaseMapState {
+    get {_storage._baseMap ?? Blueye_Protocol_SlamBaseMapState()}
+    set {_uniqueStorage()._baseMap = newValue}
+  }
+  /// Returns true if `baseMap` has been explicitly set.
+  public var hasBaseMap: Bool {_storage._baseMap != nil}
+  /// Clears the value of `baseMap`. Subsequent reads from it will return its default value.
+  public mutating func clearBaseMap() {_uniqueStorage()._baseMap = nil}
+
   public var unknownFields = SwiftProtobuf.UnknownStorage()
 
   public init() {}
 
   fileprivate var _storage = _StorageClass.defaultInstance
+}
+
+/// The base map the SLAM localizes in (SlamStatusTel.base_map), whole or a
+/// part of it (SlamMap.part, put together as SlamMapTel's).
+///
+/// Recorded, not published: a SLAM recording holds it once, when it is loaded
+/// while recording, or when a recording starts with one loaded, so that playing
+/// the recording back draws it where the status puts it. A client reads the
+/// base map from its file (SlamBaseMapState.name).
+public nonisolated struct Blueye_Protocol_SlamBaseMapTel: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// The load it is (SlamBaseMapState.load_id).
+  public var loadID: UInt32 = 0
+
+  /// The base map, or a part of it.
+  public var map: Blueye_Protocol_SlamMap {
+    get {_map ?? Blueye_Protocol_SlamMap()}
+    set {_map = newValue}
+  }
+  /// Returns true if `map` has been explicitly set.
+  public var hasMap: Bool {self._map != nil}
+  /// Clears the value of `map`. Subsequent reads from it will return its default value.
+  public mutating func clearMap() {self._map = nil}
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _map: Blueye_Protocol_SlamMap? = nil
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -4761,7 +4804,7 @@ nonisolated extension Blueye_Protocol_SlamMapTel: SwiftProtobuf.Message, SwiftPr
 
 nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   public static let protoMessageName: String = _protobuf_package + ".SlamStatusTel"
-  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}active\0\u{3}map_id\0\u{1}recording\0\u{1}sensors\0\u{3}map_full\0\u{3}loop_closure\0\u{1}frame\0\u{1}sequence\0\u{1}aiding\0\u{3}backend_failed\0")
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}active\0\u{3}map_id\0\u{1}recording\0\u{1}sensors\0\u{3}map_full\0\u{3}loop_closure\0\u{1}frame\0\u{1}sequence\0\u{1}aiding\0\u{3}backend_failed\0\u{3}base_map\0")
 
   fileprivate class _StorageClass {
     var _active: Bool = false
@@ -4774,6 +4817,7 @@ nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, Swif
     var _sequence: UInt64 = 0
     var _aiding: Blueye_Protocol_SlamAiding? = nil
     var _backendFailed: Bool = false
+    var _baseMap: Blueye_Protocol_SlamBaseMapState? = nil
 
       // This property is used as the initial default value for new instances of the type.
       // The type itself is protecting the reference to its storage via CoW semantics.
@@ -4794,6 +4838,7 @@ nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, Swif
       _sequence = source._sequence
       _aiding = source._aiding
       _backendFailed = source._backendFailed
+      _baseMap = source._baseMap
     }
   }
 
@@ -4822,6 +4867,7 @@ nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, Swif
         case 8: try { try decoder.decodeSingularUInt64Field(value: &_storage._sequence) }()
         case 9: try { try decoder.decodeSingularMessageField(value: &_storage._aiding) }()
         case 10: try { try decoder.decodeSingularBoolField(value: &_storage._backendFailed) }()
+        case 11: try { try decoder.decodeSingularMessageField(value: &_storage._baseMap) }()
         default: break
         }
       }
@@ -4864,6 +4910,9 @@ nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, Swif
       if _storage._backendFailed != false {
         try visitor.visitSingularBoolField(value: _storage._backendFailed, fieldNumber: 10)
       }
+      try { if let v = _storage._baseMap {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -4883,10 +4932,50 @@ nonisolated extension Blueye_Protocol_SlamStatusTel: SwiftProtobuf.Message, Swif
         if _storage._sequence != rhs_storage._sequence {return false}
         if _storage._aiding != rhs_storage._aiding {return false}
         if _storage._backendFailed != rhs_storage._backendFailed {return false}
+        if _storage._baseMap != rhs_storage._baseMap {return false}
         return true
       }
       if !storagesAreEqual {return false}
     }
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SlamBaseMapTel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SlamBaseMapTel"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{3}load_id\0\u{1}map\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.loadID) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._map) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.loadID != 0 {
+      try visitor.visitSingularUInt32Field(value: self.loadID, fieldNumber: 1)
+    }
+    try { if let v = self._map {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SlamBaseMapTel, rhs: Blueye_Protocol_SlamBaseMapTel) -> Bool {
+    if lhs.loadID != rhs.loadID {return false}
+    if lhs._map != rhs._map {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

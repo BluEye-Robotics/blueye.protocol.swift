@@ -1374,6 +1374,105 @@ public nonisolated struct Blueye_Protocol_SetSlamSensorSettingsRep: Sendable {
   fileprivate var _settings: Blueye_Protocol_SlamSensorSettings? = nil
 }
 
+/// Request to change the SLAM's base map: load one, clear it, reject the place
+/// found in it, or hint where the drone is in it (SlamBaseMapState).
+///
+/// One request for every action, each a member of action, so that the drone's
+/// request server passes on actions added later without knowing them. A SLAM
+/// that does not know the action set (or none) answers
+/// SLAM_REQUEST_ERROR_NOT_SUPPORTED; SlamBaseMapState.actions says beforehand
+/// which it takes. Every action is answered at once: a load goes on after the
+/// reply, and the status follows it.
+public nonisolated struct Blueye_Protocol_SetSlamBaseMapReq: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  public var action: Blueye_Protocol_SetSlamBaseMapReq.OneOf_Action? = nil
+
+  /// Load a base map, in place of any loaded before.
+  public var load: Blueye_Protocol_SlamBaseMapLoad {
+    get {
+      if case .load(let v)? = action {return v}
+      return Blueye_Protocol_SlamBaseMapLoad()
+    }
+    set {action = .load(newValue)}
+  }
+
+  /// Take the base map away.
+  public var clear: Blueye_Protocol_SlamBaseMapClear {
+    get {
+      if case .clear(let v)? = action {return v}
+      return Blueye_Protocol_SlamBaseMapClear()
+    }
+    set {action = .clear(newValue)}
+  }
+
+  /// The place found is wrong: search again without it.
+  public var reject: Blueye_Protocol_SlamBaseMapReject {
+    get {
+      if case .reject(let v)? = action {return v}
+      return Blueye_Protocol_SlamBaseMapReject()
+    }
+    set {action = .reject(newValue)}
+  }
+
+  /// Where the drone is in the base map, roughly.
+  public var hint: Blueye_Protocol_SlamBaseMapHint {
+    get {
+      if case .hint(let v)? = action {return v}
+      return Blueye_Protocol_SlamBaseMapHint()
+    }
+    set {action = .hint(newValue)}
+  }
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public nonisolated enum OneOf_Action: Equatable, Sendable {
+    /// Load a base map, in place of any loaded before.
+    case load(Blueye_Protocol_SlamBaseMapLoad)
+    /// Take the base map away.
+    case clear(Blueye_Protocol_SlamBaseMapClear)
+    /// The place found is wrong: search again without it.
+    case reject(Blueye_Protocol_SlamBaseMapReject)
+    /// Where the drone is in the base map, roughly.
+    case hint(Blueye_Protocol_SlamBaseMapHint)
+
+  }
+
+  public init() {}
+}
+
+/// Response after changing the SLAM's base map.
+public nonisolated struct Blueye_Protocol_SetSlamBaseMapRep: Sendable {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// True if the SLAM is running and answered.
+  public var available: Bool = false
+
+  /// The base map after the request. Unset when the SLAM cannot localize in one, and when available is false (no
+  /// SLAM answered, and the drone's request server answered for it).
+  public var baseMap: Blueye_Protocol_SlamBaseMapState {
+    get {_baseMap ?? Blueye_Protocol_SlamBaseMapState()}
+    set {_baseMap = newValue}
+  }
+  /// Returns true if `baseMap` has been explicitly set.
+  public var hasBaseMap: Bool {self._baseMap != nil}
+  /// Clears the value of `baseMap`. Subsequent reads from it will return its default value.
+  public mutating func clearBaseMap() {self._baseMap = nil}
+
+  /// Why the action was not done, when it was not.
+  public var error: Blueye_Protocol_SlamRequestError = .unspecified
+
+  public var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  public init() {}
+
+  fileprivate var _baseMap: Blueye_Protocol_SlamBaseMapState? = nil
+}
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate nonisolated let _protobuf_package = "blueye.protocol"
@@ -3695,6 +3794,151 @@ nonisolated extension Blueye_Protocol_SetSlamSensorSettingsRep: SwiftProtobuf.Me
     if lhs.available != rhs.available {return false}
     if lhs.applied != rhs.applied {return false}
     if lhs._settings != rhs._settings {return false}
+    if lhs.error != rhs.error {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamBaseMapReq: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamBaseMapReq"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}load\0\u{1}clear\0\u{1}reject\0\u{1}hint\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Blueye_Protocol_SlamBaseMapLoad?
+        var hadOneofValue = false
+        if let current = self.action {
+          hadOneofValue = true
+          if case .load(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.action = .load(v)
+        }
+      }()
+      case 2: try {
+        var v: Blueye_Protocol_SlamBaseMapClear?
+        var hadOneofValue = false
+        if let current = self.action {
+          hadOneofValue = true
+          if case .clear(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.action = .clear(v)
+        }
+      }()
+      case 3: try {
+        var v: Blueye_Protocol_SlamBaseMapReject?
+        var hadOneofValue = false
+        if let current = self.action {
+          hadOneofValue = true
+          if case .reject(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.action = .reject(v)
+        }
+      }()
+      case 4: try {
+        var v: Blueye_Protocol_SlamBaseMapHint?
+        var hadOneofValue = false
+        if let current = self.action {
+          hadOneofValue = true
+          if case .hint(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.action = .hint(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.action {
+    case .load?: try {
+      guard case .load(let v)? = self.action else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .clear?: try {
+      guard case .clear(let v)? = self.action else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .reject?: try {
+      guard case .reject(let v)? = self.action else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .hint?: try {
+      guard case .hint(let v)? = self.action else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamBaseMapReq, rhs: Blueye_Protocol_SetSlamBaseMapReq) -> Bool {
+    if lhs.action != rhs.action {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+nonisolated extension Blueye_Protocol_SetSlamBaseMapRep: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  public static let protoMessageName: String = _protobuf_package + ".SetSlamBaseMapRep"
+  public static let _protobuf_nameMap = SwiftProtobuf._NameMap(bytecode: "\0\u{1}available\0\u{3}base_map\0\u{1}error\0")
+
+  public mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.available) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._baseMap) }()
+      case 3: try { try decoder.decodeSingularEnumField(value: &self.error) }()
+      default: break
+      }
+    }
+  }
+
+  public func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if self.available != false {
+      try visitor.visitSingularBoolField(value: self.available, fieldNumber: 1)
+    }
+    try { if let v = self._baseMap {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if self.error != .unspecified {
+      try visitor.visitSingularEnumField(value: self.error, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  public static func ==(lhs: Blueye_Protocol_SetSlamBaseMapRep, rhs: Blueye_Protocol_SetSlamBaseMapRep) -> Bool {
+    if lhs.available != rhs.available {return false}
+    if lhs._baseMap != rhs._baseMap {return false}
     if lhs.error != rhs.error {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
